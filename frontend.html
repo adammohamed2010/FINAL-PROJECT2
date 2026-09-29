@@ -1,0 +1,1926 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SOUQ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+
+:root{
+  --green-900:#241A2C; --green-800:#2E2140; --green-700:#3E2E57; --green-600:#4E3B6E;
+  --parchment:#F6EFE3; --parchment-dim:#EDE2CE;
+  --ink:#2A1B12; --ink-soft:#5A4636;
+  --cream-text:#F7EFE0; --cream-dim:#D9CBBE;
+  --gold:#E0A458; --rust:#C1440E; --ok:#4C9F70;
+
+  --bg:var(--green-800); --bg-deep:var(--green-900);
+  --surface:var(--parchment); --surface-dim:var(--parchment-dim);
+  --text-on-bg:var(--cream-text); --text-on-bg-dim:var(--cream-dim);
+  --text-on-surface:var(--ink); --text-on-surface-dim:var(--ink-soft);
+  --accent-a:var(--gold); --accent-b:var(--rust);
+  --frame-shadow: 0 30px 70px -25px rgba(0,0,0,.55);
+  --font-display:"Baloo 2", system-ui, sans-serif;
+  --font-mono:"IBM Plex Mono", ui-monospace, monospace;
+}
+html[data-theme="light"]{
+  --bg:var(--parchment); --bg-deep:var(--parchment-dim);
+  --surface:var(--green-800); --surface-dim:var(--green-700);
+  --text-on-bg:var(--ink); --text-on-bg-dim:var(--ink-soft);
+  --text-on-surface:var(--cream-text); --text-on-surface-dim:var(--cream-dim);
+}
+*{box-sizing:border-box;}
+html,body{height:100%;}
+body{
+  margin:0; background:var(--bg); color:var(--text-on-bg); font-family:var(--font-mono);
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+  transition:background .5s ease, color .5s ease; overflow:hidden;
+}
+h1,h2,h3,.display{font-family:var(--font-display); margin:0;}
+a{color:inherit;}
+::selection{background:var(--accent-a); color:var(--green-900);}
+
+
+.app{ height:100svh; position:relative; overflow:hidden; }
+.screen{
+  position:absolute; inset:0; display:none; align-items:center; justify-content:center;
+  padding: clamp(1.5rem,4vw,3.2rem) clamp(1.1rem,5vw,4rem);
+  overflow-y:auto; -webkit-overflow-scrolling:touch;
+}
+.screen.active{ display:flex; }
+.window{ opacity:0; transform:translateY(18px) scale(.98); transition:opacity .45s cubic-bezier(.2,.7,.3,1), transform .45s cubic-bezier(.2,.7,.3,1); margin:auto 0; }
+.screen.active .window{ opacity:1; transform:none; }
+
+
+.topnav{
+  position:fixed; top:0; left:0; right:0; z-index:50;
+  min-height:64px;
+  padding: calc(env(safe-area-inset-top,0px) + .65rem) clamp(1rem,3vw,2rem) .65rem;
+  display:none; align-items:center; gap:1rem;
+  background:color-mix(in srgb, var(--bg-deep) 94%, transparent);
+  border-bottom:1px solid color-mix(in srgb, var(--text-on-bg) 14%, transparent);
+  backdrop-filter:blur(14px);
+  box-shadow:0 8px 28px rgba(0,0,0,.18);
+}
+.topnav.show{ display:flex; }
+.topnav .logo{
+  font-family:var(--font-display); font-weight:800; font-size:1.05rem;
+  color:var(--text-on-bg); display:flex; align-items:center; gap:.35rem;
+  white-space:nowrap; min-width:max-content;
+}
+.topnav .logo::before{ content:""; }
+.topnav .navlinks{ display:flex; gap:.3rem; margin-left:.5rem; flex:1; overflow-x:auto; scrollbar-width:none; }
+.topnav .navlinks::-webkit-scrollbar{ display:none; }
+.navlinks button{
+  all:unset; cursor:pointer; font-family:var(--font-mono); font-size:.68rem; letter-spacing:.02em;
+  color:var(--text-on-bg-dim); padding:.5rem .75rem; border-radius:10px;
+  white-space:nowrap; transition:background .2s ease,color .2s ease,transform .2s ease;
+}
+.navlinks button:hover{
+  background:color-mix(in srgb, var(--text-on-bg) 10%, transparent);
+  color:var(--text-on-bg);
+  transform:translateY(-1px);
+}
+.navlinks button.active{
+  background:var(--accent-a); color:var(--green-900);
+  box-shadow:0 5px 14px color-mix(in srgb, var(--accent-a) 25%, transparent);
+}
+.topnav .navicons{
+  display:flex; gap:.45rem; flex:none; margin-left:auto;
+}
+.topnav .navicons .iconbtn{
+  width:38px; height:38px; min-width:38px; min-height:38px;
+  border:1px solid color-mix(in srgb, var(--text-on-bg) 24%, transparent);
+  color:var(--text-on-bg);
+  background:color-mix(in srgb, var(--text-on-bg) 7%, transparent);
+  font-size:1rem;
+  box-shadow:0 4px 12px rgba(0,0,0,.12);
+}
+.topnav .navicons .iconbtn:hover{
+  background:var(--accent-a); color:var(--green-900);
+  border-color:var(--accent-a);
+}
+.theme-switch{
+  display:flex; align-items:center; gap:.4rem; font-size:.6rem;
+  color:var(--text-on-bg-dim); flex:none;
+}
+.theme-switch button{ all:unset; cursor:pointer; width:36px; height:21px; border-radius:999px; border:1.3px solid var(--text-on-bg-dim); position:relative; }
+.theme-switch button::after{ content:""; position:absolute; top:2px; left:2px; width:13px; height:13px; border-radius:50%; background:var(--accent-a); transition:transform .3s ease; }
+html[data-theme="light"] .theme-switch button::after{ transform:translateX(15px); }
+body.authed .app{ padding-top:56px; }
+
+
+.window{ position:relative; width:min(100%,880px); background:var(--surface); color:var(--text-on-surface); border-radius:24px; padding:clamp(1.4rem,3vw,2.6rem); box-shadow:var(--frame-shadow); }
+.window.wide{ max-width:1020px; }
+.window-header{ display:flex; align-items:center; justify-content:space-between; border-bottom:1.4px solid color-mix(in srgb, var(--text-on-surface) 28%, transparent); padding-bottom:.8rem; margin-bottom:1.4rem; flex-wrap:wrap; gap:.5rem; }
+.logo{ font-family:var(--font-display); font-weight:700; font-size:1.05rem; display:flex; align-items:center; gap:.35rem; }
+.logo::before{ content:""; font-size:.9rem; }
+.crumb{ font-size:.62rem; letter-spacing:.04em; color:var(--text-on-surface-dim); }
+
+
+.eyebrow{ font-size:.62rem; letter-spacing:.06em; color:var(--accent-b); }
+.headline{ font-size:clamp(1.5rem,3.2vw,2.2rem); font-weight:700; line-height:1.06; }
+.sub{ font-size:.8rem; color:var(--text-on-surface-dim); line-height:1.6; max-width:48ch; }
+.err{ font-size:.68rem; color:var(--accent-b); min-height:1.1em; margin:-.4rem 0 .8rem; }
+
+
+.field{ margin-bottom:1rem; }
+.field label{ display:block; font-size:.68rem; letter-spacing:.02em; margin-bottom:.35rem; color:var(--text-on-surface-dim); }
+.field input{ width:100%; padding:.7rem .85rem; border-radius:11px; border:1.5px solid color-mix(in srgb, var(--text-on-surface) 35%, transparent); background:transparent; color:var(--text-on-surface); font-family:var(--font-mono); font-size:.82rem; }
+.field input:focus-visible{ outline:2px solid var(--accent-a); outline-offset:2px; }
+.btn{ font-family:var(--font-mono); font-weight:600; font-size:.75rem; letter-spacing:.02em; padding:.7rem 1.25rem; border-radius:11px; border:none; cursor:pointer; display:inline-flex; align-items:center; gap:.4rem; transition:transform .15s ease; }
+.btn:hover{ transform:translateY(-2px); }
+.btn-solid{ background:var(--text-on-surface); color:var(--surface); }
+.btn-gold{ background:var(--accent-a); color:var(--green-900); }
+.btn-ghost{ background:transparent; color:var(--text-on-surface); border:1.4px solid color-mix(in srgb, var(--text-on-surface) 40%, transparent); }
+.btn-outline-inv{ background:transparent; color:var(--text-on-bg); border:1.4px solid color-mix(in srgb, var(--text-on-bg) 55%, transparent); }
+.btn-solid-inv{ background:var(--text-on-bg); color:var(--bg); }
+
+
+.rcard{ opacity:0; transform:translateY(14px); transition:opacity .45s ease, transform .45s ease; transition-delay:calc(var(--i,0)*60ms); }
+.rcard.in{ opacity:1; transform:none; }
+@media (prefers-reduced-motion: reduce){ .window, .rcard{ transition:none; opacity:1; transform:none; } }
+
+
+.grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:.9rem; }
+@media (max-width:640px){
+  .grid{ grid-template-columns:repeat(2,1fr); }
+  .topnav{ gap:.5rem; padding-inline:.65rem; }
+  .topnav .logo{ font-size:.9rem; }
+  .navlinks{ min-width:0; }
+  .navlinks button{ padding:.45rem .55rem; font-size:.6rem; }
+  .topnav .navicons{ gap:.25rem; }
+  .topnav .navicons .iconbtn{ width:34px; height:34px; min-width:34px; min-height:34px; }
+  .theme-switch{ display:none; }
+}
+.card{ background:color-mix(in srgb, var(--surface) 92%, var(--text-on-surface) 8%); border-radius:14px; padding:.8rem; position:relative; transition:transform .2s ease, box-shadow .2s ease; }
+.card:hover{ transform:translateY(-3px); box-shadow:0 12px 22px -14px rgba(0,0,0,.35); }
+.thumb{ aspect-ratio:4/3; border-radius:11px; margin-bottom:.6rem; display:flex; align-items:center; justify-content:center; font-size:1.7rem; background:linear-gradient(140deg, var(--accent-a), var(--accent-b)); position:relative; cursor:pointer; }
+.card .name{ font-size:.76rem; font-weight:600; cursor:pointer; }
+.card .seller{ font-size:.63rem; color:var(--text-on-surface-dim); margin:.12rem 0 .45rem; }
+.card .row{ display:flex; align-items:center; justify-content:space-between; }
+.price{ font-weight:700; font-size:.78rem; }
+.tag{ position:absolute; top:.5rem; left:.5rem; font-size:.55rem; letter-spacing:.03em; padding:.16rem .45rem; border-radius:999px; }
+.tag.sell{ background:var(--accent-b); color:var(--cream-text); }
+.tag.trade{ background:var(--accent-a); color:var(--green-900); }
+.tag.ok{ background:var(--ok); color:#fff; }
+.tag.pending{ background:color-mix(in srgb, var(--accent-a) 70%, transparent); color:var(--green-900); }
+.iconbtn{ width:26px; height:26px; border-radius:50%; border:1.3px solid color-mix(in srgb, var(--text-on-surface) 40%, transparent); display:flex; align-items:center; justify-content:center; background:transparent; cursor:pointer; color:var(--text-on-surface); font-size:.7rem; }
+.iconbtn.filled{ color:var(--accent-b); }
+.pd-actions .btn.is-fav{ background:var(--accent-b); color:var(--cream-text); border-color:var(--accent-b); box-shadow:0 8px 20px color-mix(in srgb, var(--accent-b) 25%, transparent); }
+.pd-actions .btn.is-fav::first-letter{ color:var(--cream-text); }
+.searchbar{ cursor:text; transition:border-color .2s ease, box-shadow .2s ease, transform .2s ease; }
+.searchbar:focus-within{ border-color:var(--accent-a); box-shadow:0 0 0 3px color-mix(in srgb, var(--accent-a) 18%, transparent); transform:translateY(-1px); }
+.searchbar input{ flex:1; min-width:0; border:0; outline:0; background:transparent; color:var(--text-on-surface); font-family:var(--font-mono); font-size:.76rem; }
+.searchbar input::placeholder{ color:var(--text-on-surface-dim); opacity:1; }
+.navicons .iconbtn{ position:relative; }
+.navicons .iconbtn.cart-bounce{ animation:cartBounce .55s cubic-bezier(.2,.8,.2,1); }
+@keyframes cartBounce{ 0%{transform:scale(1)} 30%{transform:scale(1.22) rotate(-5deg)} 55%{transform:scale(.92) rotate(4deg)} 80%{transform:scale(1.08)} 100%{transform:scale(1)} }
+.card.added-to-cart{ animation:cardCartPulse .5s ease; }
+@keyframes cardCartPulse{ 0%{transform:translateY(0)} 40%{transform:translateY(-5px) scale(1.015)} 100%{transform:translateY(0) scale(1)} }
+.pd-actions .btn.is-fav{ animation:heartPop .35s ease; }
+@keyframes heartPop{ 0%{transform:scale(.9)} 60%{transform:scale(1.08)} 100%{transform:scale(1)} }
+.wishlist-heart{ transition:transform .2s ease, color .2s ease; }
+.wishlist-heart:hover{ transform:scale(1.12); }
+
+
+
+.navicons .iconbtn{position:relative;overflow:visible;transition:transform .18s ease, background .18s ease, color .18s ease;}
+.navicons .iconbtn.pop{animation:navPop .55s cubic-bezier(.2,.8,.2,1);}
+@keyframes navPop{0%{transform:scale(1)}35%{transform:scale(1.28) rotate(-7deg)}60%{transform:scale(.9) rotate(5deg)}100%{transform:scale(1)}}
+.navicons .iconbtn .badge{position:absolute;right:-5px;top:-6px;min-width:17px;height:17px;padding:0 4px;border-radius:99px;background:var(--accent-a);color:var(--green-900);font:700 10px/17px var(--font-mono);text-align:center;}
+.pd-actions .btn{transition:transform .18s ease, box-shadow .18s ease, background .18s ease;}
+.pd-actions .btn:active{transform:scale(.96);}
+.pd-actions .btn.added{animation:buttonPop .55s ease;}
+@keyframes buttonPop{0%{transform:scale(1)}35%{transform:scale(1.07)}65%{transform:scale(.96)}100%{transform:scale(1)}}
+#pdWish.is-fav{background:var(--accent-a);color:var(--green-900);border-color:var(--accent-a);}
+#pdWish.heart-pop{animation:heartPop .5s cubic-bezier(.2,.8,.2,1);}
+@keyframes heartPop{0%{transform:scale(1)}35%{transform:scale(1.18) rotate(-4deg)}65%{transform:scale(.94) rotate(3deg)}100%{transform:scale(1)}}
+.card.cart-pulse{animation:cardCartPulse .55s ease;}
+@keyframes cardCartPulse{0%{transform:translateY(0) scale(1)}35%{transform:translateY(-6px) scale(1.025)}65%{transform:translateY(1px) scale(.985)}100%{transform:translateY(0) scale(1)}}
+
+.hero-inner{ text-align:center; max-width:640px; }
+.hero-inner .display{ font-size:clamp(2.4rem,7.5vw,4.6rem); font-weight:800; line-height:.95; }
+.hero-inner .tagline{ margin:1rem 0 2rem; font-size:.9rem; color:var(--text-on-bg-dim); max-width:40ch; margin-inline:auto; }
+.hero-actions{ display:flex; gap:.8rem; justify-content:center; flex-wrap:wrap; }
+
+.auth-foot{ display:flex; align-items:center; justify-content:space-between; margin-top:1.2rem; flex-wrap:wrap; gap:.7rem; }
+.auth-foot .muted{ font-size:.68rem; color:var(--text-on-surface-dim); }
+.auth-foot a{ text-decoration:underline; cursor:pointer; }
+
+.searchbar{ display:flex; gap:.5rem; align-items:center; border:1.4px solid color-mix(in srgb, var(--text-on-surface) 35%, transparent); border-radius:999px; padding:.5rem .9rem; margin-bottom:1rem; font-size:.76rem; color:var(--text-on-surface-dim); }
+.chiprow{ display:flex; gap:.5rem; margin-bottom:1.2rem; flex-wrap:wrap; }
+.chip{ font-size:.66rem; letter-spacing:.02em; padding:.38rem .8rem; border-radius:999px; border:1.4px solid color-mix(in srgb, var(--text-on-surface) 35%, transparent); cursor:pointer; }
+.chip.is-active{ background:var(--text-on-surface); color:var(--surface); }
+
+.pd-grid{ display:grid; grid-template-columns:1.05fr 1fr; gap:1.8rem; align-items:start; }
+@media (max-width:700px){ .pd-grid{ grid-template-columns:1fr; } }
+.pd-media{ aspect-ratio:1/1; border-radius:16px; background:linear-gradient(150deg, var(--accent-a), var(--accent-b)); display:flex; align-items:center; justify-content:center; font-size:4rem; }
+.pd-seller{ display:flex; align-items:center; gap:.6rem; margin:1rem 0; }
+.pd-seller .avatar{ width:34px; height:34px; border-radius:50%; background:var(--surface-dim); display:flex; align-items:center; justify-content:center; font-size:.9rem; }
+.stepper{ display:flex; align-items:center; gap:.6rem; margin:1rem 0; }
+.stepper button{ width:30px; height:30px; border-radius:8px; border:1.4px solid color-mix(in srgb, var(--text-on-surface) 35%, transparent); background:transparent; cursor:pointer; font-family:var(--font-mono); }
+.pd-actions{ display:flex; gap:.7rem; flex-wrap:wrap; margin-top:.6rem; }
+
+.cart-list{ display:flex; flex-direction:column; gap:.7rem; margin-bottom:1.2rem; }
+.cart-item{ display:flex; gap:.8rem; align-items:center; background:color-mix(in srgb, var(--surface) 92%, var(--text-on-surface) 8%); border-radius:13px; padding:.65rem; }
+.cart-item .thumb{ width:52px; height:52px; aspect-ratio:auto; margin:0; font-size:1.2rem; flex:none; cursor:default; }
+.cart-item .meta{ flex:1; }
+.cart-item .name{ font-size:.76rem; font-weight:600; cursor:default; }
+.cart-item .seller{ font-size:.62rem; color:var(--text-on-surface-dim); }
+.cart-h{ font-size:.82rem; font-weight:700; margin:.4rem 0 .6rem; display:flex; align-items:center; gap:.5rem; }
+.cart-h .cnt{ font-size:.6rem; font-weight:600; padding:.1rem .45rem; border-radius:999px; background:color-mix(in srgb, var(--text-on-surface) 14%, transparent); }
+.cart-side{ display:flex; align-items:center; gap:.5rem; flex-wrap:wrap; justify-content:flex-end; }
+.cart-mini{ padding:.42rem .7rem; font-size:.62rem; border-radius:9px; }
+.trade-box{ display:flex; flex-wrap:wrap; align-items:center; gap:.45rem; margin-top:.45rem; }
+.trade-note{ flex:1 1 150px; min-width:0; padding:.42rem .6rem; border-radius:9px; border:1.4px solid color-mix(in srgb, var(--text-on-surface) 30%, transparent); background:transparent; color:var(--text-on-surface); font-family:var(--font-mono); font-size:.64rem; }
+.offer-status{ font-size:.62rem; font-weight:600; }
+.offer-status.rejected{ color:var(--accent-b); }
+.offer-status.accepted{ color:var(--ok); }
+.bubble-img{ display:block; max-width:220px; max-height:220px; border-radius:10px; margin-bottom:.35rem; cursor:pointer; object-fit:cover; }
+.offer-actions{ display:flex; gap:.4rem; margin-top:.45rem; }
+.cart-total{ display:flex; justify-content:space-between; align-items:center; border-top:1.4px solid color-mix(in srgb, var(--text-on-surface) 30%, transparent); padding-top:.9rem; }
+
+.profile-top{ display:flex; gap:1.1rem; align-items:center; margin-bottom:1.2rem; flex-wrap:wrap; }
+.avatar-lg{ width:70px; height:70px; border-radius:50%; background:linear-gradient(140deg, var(--accent-a), var(--accent-b)); display:flex; align-items:center; justify-content:center; font-size:1.5rem; color:var(--cream-text); flex:none; }
+.stat-row{ display:flex; gap:1.6rem; margin:1.2rem 0 1.4rem; flex-wrap:wrap; }
+.stat-row div{ text-align:left; }
+.stat-row strong{ display:block; font-size:1.1rem; font-weight:700; }
+.stat-row span{ font-size:.62rem; color:var(--text-on-surface-dim); }
+.quicknav{ display:flex; gap:.6rem; flex-wrap:wrap; margin-bottom:1.4rem; }
+.quicknav a{ font-size:.68rem; padding:.5rem .85rem; border-radius:999px; border:1.4px solid color-mix(in srgb, var(--text-on-surface) 35%, transparent); cursor:pointer; }
+
+.settings-row{ display:flex; justify-content:space-between; align-items:center; gap:1rem; padding:.8rem 0; border-bottom:1px solid color-mix(in srgb, var(--text-on-surface) 18%, transparent); font-size:.76rem; }
+.mini-toggle{ width:36px; height:21px; border-radius:999px; border:1.5px solid var(--text-on-surface); position:relative; cursor:pointer; background:transparent; }
+.mini-toggle::after{ content:""; position:absolute; top:2px; left:2px; width:13px; height:13px; border-radius:50%; background:var(--text-on-surface); transition:transform .25s ease; }
+.mini-toggle.on::after{ transform:translateX(15px); background:var(--accent-a); }
+
+.fab{
+  display:none; position:fixed; right:clamp(1rem,3vw,2rem); bottom:clamp(1rem,3vw,2rem); z-index:60;
+  width:58px; height:58px; border-radius:50%; border:none; cursor:pointer;
+  background:var(--accent-a); color:var(--green-900); font-family:var(--font-mono); font-weight:700; font-size:1.6rem; line-height:1;
+  box-shadow:0 14px 30px -10px rgba(0,0,0,.5); transition:transform .18s ease, box-shadow .18s ease;
+}
+.fab:hover{ transform:translateY(-3px) scale(1.04); box-shadow:0 18px 34px -8px rgba(0,0,0,.55); }
+.fab.show{ display:flex; align-items:center; justify-content:center; }
+.fab.pop{ animation:fabPop .5s cubic-bezier(.2,.8,.2,1); }
+@keyframes fabPop{ 0%{transform:scale(1)} 35%{transform:scale(1.25) rotate(90deg)} 65%{transform:scale(.9) rotate(60deg)} 100%{transform:scale(1) rotate(0)} }
+
+.modal-backdrop{
+  display:none; position:fixed; inset:0; z-index:70; background:rgba(20,14,10,.55); backdrop-filter:blur(3px);
+  align-items:center; justify-content:center; padding:1.2rem; overflow-y:auto;
+}
+.modal-backdrop.show{ display:flex; }
+.ap-window{ width:min(100%,480px); margin:auto; opacity:1; transform:none; animation:apIn .3s cubic-bezier(.2,.7,.3,1); }
+@keyframes apIn{ 0%{opacity:0; transform:translateY(16px) scale(.97);} 100%{opacity:1; transform:none;} }
+.ap-photo{
+  aspect-ratio:16/9; border-radius:13px; border:1.5px dashed color-mix(in srgb, var(--text-on-surface) 40%, transparent);
+  display:flex; align-items:center; justify-content:center; font-size:.72rem; color:var(--text-on-surface-dim);
+  cursor:pointer; background-size:cover; background-position:center; text-align:center; padding:.5rem;
+}
+
+
+.card-actions{ display:flex; align-items:center; gap:.35rem; }
+.tag.both{ background:linear-gradient(90deg, var(--accent-b), var(--accent-a)); color:var(--cream-text); }
+.sortrow{ display:flex; align-items:center; gap:.6rem; margin-bottom:1.2rem; font-size:.66rem; color:var(--text-on-surface-dim); }
+.sortrow select{ padding:.4rem .7rem; border-radius:999px; border:1.4px solid color-mix(in srgb, var(--text-on-surface) 35%, transparent); background:transparent; color:var(--text-on-surface); font-family:var(--font-mono); font-size:.66rem; cursor:pointer; }
+.sortrow select option{ background:var(--surface); color:var(--text-on-surface); }
+.langbtn{ flex:none; width:38px; height:38px; min-width:38px; min-height:38px; padding:0; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:1rem; line-height:1;
+  border:1px solid color-mix(in srgb, var(--text-on-bg) 24%, transparent); color:var(--text-on-bg);
+  background:color-mix(in srgb, var(--text-on-bg) 7%, transparent); box-shadow:0 4px 12px rgba(0,0,0,.12); transition:background .2s ease,color .2s ease; }
+.langbtn:hover{ background:var(--accent-a); color:var(--green-900); border-color:var(--accent-a); }
+@media (max-width:640px){ .langbtn{ width:34px; height:34px; min-width:34px; min-height:34px; } }
+html[lang="ar"]{
+  --font-display:"Baloo 2","Noto Sans Arabic",Tahoma,system-ui,sans-serif;
+  --font-mono:"IBM Plex Mono","Noto Sans Arabic",Tahoma,system-ui,sans-serif;
+}
+
+/* ---- notifications / contact / buy now ---- */
+.navicons .iconbtn .badge.notif{background:var(--accent-b);color:var(--cream-text);}
+.ok-msg{font-size:.68rem;color:var(--ok);min-height:1.1em;margin:-.4rem 0 .8rem;}
+.chat-wrap{display:grid;grid-template-columns:290px 1fr;gap:1rem;height:min(68vh,560px);}
+.chat-side,.chat-main{border-radius:14px;background:color-mix(in srgb, var(--surface) 92%, var(--text-on-surface) 8%);min-height:0;overflow:hidden;}
+.chat-side{overflow-y:auto;}
+.chat-row{padding:.75rem .9rem;cursor:pointer;border-bottom:1px solid color-mix(in srgb, var(--text-on-surface) 10%, transparent);position:relative;}
+.chat-row:hover{background:color-mix(in srgb, var(--text-on-surface) 6%, transparent);}
+.chat-row.active{background:color-mix(in srgb, var(--accent-a) 22%, transparent);}
+.chat-row .cr-top{display:flex;justify-content:space-between;gap:.4rem;align-items:center;}
+.chat-row .cr-name{font-size:.76rem;font-weight:700;}
+.chat-row .cr-time{font-size:.56rem;color:var(--text-on-surface-dim);white-space:nowrap;}
+.chat-row .cr-prod{font-size:.62rem;color:var(--accent-b);margin:.1rem 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.chat-row .cr-last{font-size:.68rem;color:var(--text-on-surface-dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.chat-row .cr-badge{background:var(--accent-b);color:var(--cream-text);font:700 10px/17px var(--font-mono);min-width:17px;height:17px;padding:0 5px;border-radius:99px;text-align:center;}
+.chat-main{display:flex;flex-direction:column;}
+.chat-empty{margin:auto;font-size:.75rem;color:var(--text-on-surface-dim);padding:1rem;text-align:center;}
+.chat-thread{display:flex;flex-direction:column;height:100%;min-height:0;}
+.chat-head{display:flex;align-items:center;gap:.7rem;padding:.7rem .9rem;border-bottom:1px solid color-mix(in srgb, var(--text-on-surface) 14%, transparent);}
+.chat-title{font-size:.82rem;font-weight:700;}
+.chat-sub{font-size:.62rem;color:var(--accent-b);cursor:pointer;}
+.chat-back{display:none;padding:.4rem .7rem;}
+.chat-msgs{flex:1;overflow-y:auto;padding:1rem;display:flex;flex-direction:column;gap:.5rem;min-height:0;}
+.bubble{max-width:78%;padding:.55rem .8rem;border-radius:14px;font-size:.78rem;line-height:1.45;white-space:pre-wrap;word-break:break-word;}
+.bubble.me{align-self:flex-end;background:var(--accent-a);color:var(--green-900);border-bottom-right-radius:4px;}
+.bubble.them{align-self:flex-start;background:color-mix(in srgb, var(--text-on-surface) 13%, transparent);border-bottom-left-radius:4px;}
+.bubble .t{display:block;font-size:.55rem;opacity:.65;margin-top:.25rem;}
+.chat-input{display:flex;gap:.5rem;padding:.7rem;border-top:1px solid color-mix(in srgb, var(--text-on-surface) 14%, transparent);}
+.chat-input textarea{flex:1;resize:none;height:44px;padding:.65rem .8rem;border-radius:11px;border:1.5px solid color-mix(in srgb, var(--text-on-surface) 35%, transparent);background:transparent;color:var(--text-on-surface);font-family:var(--font-mono);font-size:.8rem;}
+.chat-input textarea:focus-visible{outline:2px solid var(--accent-a);outline-offset:2px;}
+@media (max-width:700px){
+  .chat-wrap{grid-template-columns:1fr;height:72vh;}
+  .chat-wrap .chat-main{display:none;}
+  .chat-wrap.show-thread .chat-side{display:none;}
+  .chat-wrap.show-thread .chat-main{display:flex;}
+  .chat-back{display:inline-flex;}
+}
+
+/* ---- scroll reveal (home + assistant results) ---- */
+.reveal-grid .rcard{transition:opacity .7s ease, transform .85s cubic-bezier(.2,.8,.2,1), box-shadow .2s ease; transition-delay:calc(var(--i,0)*90ms);}
+.reveal-grid .rcard:not(.in){opacity:0; transform:translateY(48px) scale(.92) rotate(var(--tilt,0deg));}
+.reveal-grid .rcard:nth-child(3n+1){--tilt:-2.5deg;}
+.reveal-grid .rcard:nth-child(3n){--tilt:2.5deg;}
+.reveal-grid .rcard.settled{transition:transform .2s ease, box-shadow .2s ease; transition-delay:0s;}
+.reveal-grid .thumb{overflow:hidden;}
+.reveal-grid .rcard.in .thumb::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(110deg,transparent 30%,rgba(255,255,255,.4) 50%,transparent 70%);transform:translateX(-120%);animation:shine 1.2s ease .35s 1 forwards;}
+@keyframes shine{to{transform:translateX(120%);}}
+.topnav .sp{position:absolute;left:0;bottom:-1px;height:3px;width:0;background:linear-gradient(90deg,var(--accent-b),var(--accent-a));transition:width .12s linear;}
+@media (prefers-reduced-motion: reduce){ .reveal-grid .rcard:not(.in){opacity:1!important;transform:none!important;} .reveal-grid .rcard.in .thumb::after{display:none;} }
+
+/* ---- seller rating ---- */
+.rate-box{margin-top:.65rem;padding-top:.6rem;border-top:1px dashed color-mix(in srgb,var(--text-on-surface) 28%,transparent);}
+.rate-title{font-size:.62rem;font-weight:600;color:var(--text-on-surface-dim);margin-bottom:.2rem;}
+.stars{display:flex;gap:.1rem;}
+.star{all:unset;position:relative;cursor:pointer;font-size:1.45rem;line-height:1.1;color:color-mix(in srgb,var(--text-on-surface) 45%,transparent);transition:transform .2s cubic-bezier(.2,.8,.2,1),color .15s;}
+span.star{cursor:default;}
+.stars:hover .star{color:var(--accent-a);}
+.stars .star:hover ~ .star{color:color-mix(in srgb,var(--text-on-surface) 45%,transparent);}
+.stars .star:hover{transform:scale(1.28) rotate(-8deg);}
+.star.on,.stars:hover .star.on{color:var(--accent-a);animation:starPop .55s cubic-bezier(.2,.8,.2,1) backwards;animation-delay:calc(var(--k)*70ms);}
+@keyframes starPop{0%{transform:scale(.3) rotate(-50deg);opacity:.2;}55%{transform:scale(1.55) rotate(14deg);}100%{transform:scale(1) rotate(0);opacity:1;}}
+.spark{position:absolute;left:50%;top:50%;width:5px;height:5px;margin:-2.5px;border-radius:50%;background:var(--accent-a);pointer-events:none;animation:spark .6s ease-out forwards;}
+@keyframes spark{to{transform:translate(var(--dx),var(--dy)) scale(.2);opacity:0;}}
+.rate-form{display:grid;grid-template-rows:0fr;opacity:0;transition:grid-template-rows .45s cubic-bezier(.2,.8,.2,1),opacity .45s ease;}
+.rate-form.open{grid-template-rows:1fr;opacity:1;}
+.rate-form>div{min-height:0;overflow:hidden;}
+.rate-form textarea{width:100%;margin-top:.5rem;resize:none;padding:.5rem .6rem;border-radius:9px;border:1.4px solid color-mix(in srgb,var(--text-on-surface) 30%,transparent);background:transparent;color:var(--text-on-surface);font-family:var(--font-mono);font-size:.68rem;}
+.rate-form textarea:focus-visible{outline:2px solid var(--accent-a);outline-offset:1px;}
+.rate-form .btn{margin-top:.4rem;}
+.rate-comment{font-size:.66rem;color:var(--text-on-surface-dim);margin-top:.25rem;word-break:break-word;}
+.rate-done{animation:apIn .45s cubic-bezier(.2,.7,.3,1);}
+.rate-thanks{font-size:.62rem;color:var(--ok);margin-top:.3rem;}
+.reviews{display:flex;flex-direction:column;gap:.6rem;margin-bottom:1.2rem;}
+.review{padding:.65rem .8rem;border-radius:12px;background:color-mix(in srgb,var(--surface) 92%,var(--text-on-surface) 8%);}
+.review .rv-top{display:flex;justify-content:space-between;gap:.5rem;font-size:.72rem;}
+.review .rv-stars{color:var(--accent-a);letter-spacing:.05em;}
+.review .rv-prod{font-size:.6rem;color:var(--accent-b);margin:.1rem 0;}
+.review .rv-text{font-size:.68rem;color:var(--text-on-surface-dim);word-break:break-word;}
+
+/* ---- AI shopping assistant ---- */
+.ai-cta{all:unset;box-sizing:border-box;display:flex;align-items:center;justify-content:space-between;gap:.6rem;width:100%;cursor:pointer;margin-bottom:1rem;padding:.8rem 1rem;border-radius:14px;font:600 .74rem var(--font-mono);color:var(--green-900);background:linear-gradient(100deg,var(--accent-a),#f2c987,var(--accent-a));background-size:220% 100%;animation:ctaShift 5s ease-in-out infinite;transition:transform .2s ease;}
+.ai-cta:hover{transform:translateY(-2px);}
+@keyframes ctaShift{0%,100%{background-position:0 0;}50%{background-position:100% 0;}}
+.ai-box{display:flex;flex-direction:column;height:min(72vh,620px);border-radius:14px;background:color-mix(in srgb,var(--surface) 92%,var(--text-on-surface) 8%);overflow:hidden;}
+.ai-msgs{position:relative;flex:1;min-height:0;overflow-y:auto;padding:1rem;display:flex;flex-direction:column;gap:.6rem;}
+.ai-msgs .bubble{animation:apIn .3s ease;}
+.ai-msgs .grid{margin:.2rem 0 .6rem;}
+.ai-chips{margin:0;}
+.typing{display:inline-flex;gap:4px;align-items:center;padding:.15rem 0;}
+.typing i{width:6px;height:6px;border-radius:50%;background:currentColor;opacity:.35;animation:blink 1s infinite;}
+.typing i:nth-child(2){animation-delay:.15s;}
+.typing i:nth-child(3){animation-delay:.3s;}
+@keyframes blink{0%,100%{opacity:.25;transform:translateY(0);}50%{opacity:.9;transform:translateY(-3px);}}
+
+.field textarea{width:100%;resize:none;padding:.7rem .85rem;border-radius:11px;border:1.5px solid color-mix(in srgb,var(--text-on-surface) 35%,transparent);background:transparent;color:var(--text-on-surface);font-family:var(--font-mono);font-size:.82rem;}
+.field textarea:focus-visible{outline:2px solid var(--accent-a);outline-offset:2px;}
+</style>
+</head>
+<body>
+
+<div class="topnav" id="topnav">
+  <div class="logo">SOUQ</div>
+  <div class="navlinks" id="navlinks"></div>
+  <div class="navicons">
+    <span class="iconbtn" id="wishNavIcon" onclick="openWishlist()" title="Wishlist" aria-label="Wishlist">♡</span>
+    <span class="iconbtn" id="notifNavIcon" onclick="openChatPage()" title="Chat" aria-label="Chat">🔔</span>
+    <span class="iconbtn" id="cartNavIcon" onclick="goTo('cart')" title="Cart" aria-label="Cart">🛒</span>
+    <span class="iconbtn" onclick="goTo('profile')" title="Profile" aria-label="Profile">👤</span>
+  </div>
+  <div class="theme-switch"><span id="themeLabel">DARK</span><button id="themeBtn" aria-label="Toggle theme"></button></div>
+  <button type="button" class="langbtn" id="langBtn" title="Language" aria-label="Language">🌐</button>
+  <i class="sp" id="scrollBar"></i>
+</div>
+
+<div class="app">
+
+  
+  <section class="screen active" id="hero">
+    <div class="hero-inner">
+      <p class="eyebrow">A MARKETPLACE FOR THE EVERYDAY</p>
+      <h1 class="display">SOUQ</h1>
+      <p class="tagline">Buy what you need, sell what you don't, trade what you'd rather swap.</p>
+      <div class="hero-actions">
+        <button class="btn btn-solid-inv" onclick="goTo('signup')">Sign up</button>
+        <button class="btn btn-outline-inv" onclick="goTo('login')">Log in</button>
+      </div>
+    </div>
+  </section>
+
+  
+  <section class="screen" id="signup">
+    <div class="window">
+      <div class="window-header"><div class="logo">SOUQ</div><span class="crumb" style="cursor:pointer;" onclick="goTo('hero')">← BACK</span></div>
+      <p class="eyebrow">STEP 1 OF 1</p>
+      <h2 class="headline" style="margin-bottom:1.2rem;">Open your stall</h2>
+      <div class="field"><label>Username</label><input id="suUser" placeholder=""></div>
+      <div class="field"><label>Email or phone number</label><input id="suEmail" placeholder="you@gmail.com"></div>
+      <div class="field"><label>Password</label><input id="suPass" type="password" placeholder="••••••••"></div>
+      <div class="field"><label>Confirm password</label><input id="suConfirm" type="password" placeholder="••••••••"></div>
+      <p class="err" id="suErr"></p>
+      <div class="auth-foot">
+        <span class="muted">Already have an account? <a onclick="goTo('login')">Log in</a></span>
+        <button class="btn btn-solid" onclick="submitSignup()">Create account →</button>
+      </div>
+    </div>
+  </section>
+
+  
+  <section class="screen" id="login">
+    <div class="window">
+      <div class="window-header"><div class="logo">SOUQ</div><span class="crumb" style="cursor:pointer;" onclick="goTo('hero')">← BACK</span></div>
+      <h2 class="headline" style="margin-bottom:1.2rem;">Log in</h2>
+      <div class="field"><label>Username</label><input id="liUser" placeholder=""></div>
+      <div class="field"><label>Password</label><input id="liPass" type="password" placeholder="••••••••"></div>
+      <p class="err" id="liErr"></p>
+      <p class="sub" style="margin:.2rem 0 1rem;"><a onclick="goTo('reset-password')" style="text-decoration:underline; cursor:pointer;">Forgot password?</a></p>
+      <div class="auth-foot">
+        <span class="muted">New here? <a onclick="goTo('signup')">Create an account</a></span>
+        <button class="btn btn-solid" onclick="submitLogin()">Log in →</button>
+      </div>
+    </div>
+  </section>
+
+  
+  <section class="screen" id="home">
+    <div class="window wide">
+      <div class="window-header"><div class="logo">SOUQ</div><span class="crumb">WELCOME BACK</span></div>
+      <button type="button" class="ai-cta" onclick="goTo('assistant')"><span>Not sure what to buy? Ask the AI shopping assistant →</span><span aria-hidden="true"></span></button>
+      <label class="searchbar" for="homeSearch"><span aria-hidden="true"></span><input id="homeSearch" type="search" placeholder="Search....." autocomplete="off" /></label>
+      <div class="chiprow">
+        <span class="chip is-active" data-cat="All">All</span><span class="chip" data-cat="Home &amp; kitchen">Home &amp; kitchen</span><span class="chip" data-cat="Electronics">Electronics</span><span class="chip" data-cat="Plants">Plants</span><span class="chip" data-cat="Art">Art</span>
+      </div>
+      <div class="sortrow">
+        <label for="homeSort">Sort by</label>
+        <select id="homeSort">
+          <option value="default">Default</option>
+          <option value="price-desc">Price: highest to lowest</option>
+          <option value="price-asc">Price: lowest to highest</option>
+          <option value="name-asc">Name: A → Z</option>
+          <option value="name-desc">Name: Z → A</option>
+        </select>
+      </div>
+      <div class="grid reveal-grid" id="homeGrid"></div>
+    </div>
+  </section>
+
+  
+  <section class="screen" id="product">
+    <div class="window wide">
+      <div class="window-header"><div class="logo">SOUQ</div><span class="crumb" onclick="goTo('home')" style="cursor:pointer;">← BACK TO BROWSE</span></div>
+      <div class="pd-grid">
+        <div class="pd-media" id="pdMedia"></div>
+        <div>
+          <p class="eyebrow" id="pdCategory">HOME &amp; KITCHEN</p>
+          <h2 class="headline" id="pdName">Loading…</h2>
+          <p class="price" style="font-size:1.3rem; margin:.5rem 0;" id="pdPrice"></p>
+          <p class="sub" id="pdDesc"></p>
+          <div class="pd-seller">
+            <div class="avatar">👤</div>
+            <div><div style="font-size:.78rem; font-weight:600;" id="pdSellerName">—</div><div class="sub" style="margin:0;">Seller rating: <span id="pdSellerRating">-</span></div><div class="sub" style="margin:0;">Usually replies within an hour</div></div>
+          </div>
+          <div class="pd-actions">
+            <button class="btn btn-solid" id="pdBuy" onclick="buyNow()">Buy now</button>
+            <button class="btn btn-gold" id="pdAdd" onclick="addToCart(window.currentProductId)">Add to cart</button>
+            <button class="btn btn-ghost" id="pdContact" onclick="openContact()">Contact seller</button>
+            <button class="btn btn-ghost" id="pdWish" onclick="toggleWish(window.currentProductId, this)">♡ Save</button>
+            <button class="btn btn-ghost" id="pdDelete" style="display:none; color:var(--accent-b); border-color:var(--accent-b);" onclick="deleteProduct(window.currentProductId)">🗑 Delete listing</button>
+          </div>
+          <p class="err" id="pdErr"></p>
+          <p class="ok-msg" id="pdOk"></p>
+        </div>
+      </div>
+      <p class="eyebrow" style="margin-top:2rem;">YOU MIGHT ALSO LIKE</p>
+      <div class="grid" id="relatedGrid" style="margin-top:.8rem;"></div>
+    </div>
+  </section>
+
+  
+  <section class="screen" id="cart">
+    <div class="window">
+      <div class="window-header"><div class="logo">SOUQ</div></div>
+      <p class="eyebrow">YOUR CART</p>
+      <h3 class="cart-h">Items for sale</h3>
+      <div class="cart-list" id="cartSaleList"></div>
+      <h3 class="cart-h">Items for trade</h3>
+      <div class="cart-list" id="cartTradeList"></div>
+      <p class="err" id="cartErr"></p>
+      <div class="cart-total"><span class="sub" style="margin:0;" id="cartCount">0 items</span><button class="btn btn-gold" onclick="checkout()" id="checkoutBtn">Checkout — 0 EGP</button></div>
+    </div>
+  </section>
+
+  
+  <section class="screen" id="chat">
+    <div class="window wide">
+      <div class="window-header"><div class="logo">SOUQ</div></div>
+      <p class="eyebrow">Chat</p>
+      <div class="chat-wrap" id="chatWrap">
+        <div class="chat-side" id="chatList"></div>
+        <div class="chat-main" id="chatMain">
+          <div class="chat-empty" id="chatEmpty">Select a conversation to start chatting.</div>
+          <div class="chat-thread" id="chatThread" style="display:none;">
+            <div class="chat-head">
+              <button class="btn btn-ghost chat-back" onclick="chatBack()">←</button>
+              <div><div class="chat-title" id="chatTitle"></div><div class="chat-sub" id="chatSub"></div></div>
+            </div>
+            <div class="chat-msgs" id="chatMsgs"></div>
+            <p class="err" id="chatErr" style="margin:.2rem .8rem;"></p>
+            <div class="chat-input">
+              <textarea id="chatText" maxlength="1000" rows="1" placeholder="Write a message…"></textarea>
+              <button class="btn btn-gold" id="chatSend" onclick="sendChat()">Send</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="screen" id="assistant">
+    <div class="window wide">
+      <div class="window-header"><div class="logo">SOUQ</div><span class="crumb" style="cursor:pointer;" onclick="aiReset()">↻ NEW SEARCH</span></div>
+      <p class="eyebrow">AI SHOPPING ASSISTANT</p>
+      <div class="ai-box">
+        <div class="ai-msgs" id="aiMsgs"></div>
+        <div class="chat-input">
+          <textarea id="aiText" maxlength="500" rows="1" placeholder="Write a message…"></textarea>
+          <button class="btn btn-gold" id="aiSend" onclick="aiSend()">Send</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="screen" id="wishlist">
+    <div class="window wide">
+      <div class="window-header"><div class="logo">SOUQ</div></div>
+      <p class="eyebrow">WISHLIST</p>
+      <h2 class="headline" style="margin-bottom:1rem;">Saved for later</h2>
+      <div class="grid" id="wishGrid"></div>
+    </div>
+  </section>
+
+  
+  <section class="screen" id="bought">
+    <div class="window wide">
+      <div class="window-header"><div class="logo">SOUQ</div></div>
+      <p class="eyebrow">MY PURCHASES</p>
+      <h2 class="headline" style="margin-bottom:1rem;">Things I bought</h2>
+      <div class="grid" id="boughtGrid"></div>
+    </div>
+  </section>
+
+  
+  <section class="screen" id="sold">
+    <div class="window wide">
+      <div class="window-header"><div class="logo">SOUQ</div></div>
+      <p class="eyebrow">MY LISTINGS</p>
+      <h2 class="headline" style="margin-bottom:1rem;">Things I sold</h2>
+      <div class="grid" id="soldGrid"></div>
+    </div>
+  </section>
+
+  
+  <section class="screen" id="profile">
+    <div class="window">
+      <div class="window-header"><div class="logo">SOUQ</div></div>
+      <div class="profile-top">
+        <div class="avatar-lg">👤</div>
+        <div><div style="font-weight:700; font-size:1rem;" id="profileName">nourfromdokki</div><div class="sub" style="margin:0;" id="profileEmail"></div></div>
+      </div>
+      <div class="stat-row">
+        <div><strong id="profileListings">0</strong><span>LISTINGS</span></div>
+        <div><strong id="profileSold">0</strong><span>SOLD</span></div>
+        <div><strong id="profileRating">-</strong><span>RATING</span></div>
+        
+      </div>
+      <div class="quicknav">
+        <a onclick="goTo('bought')">Purchases</a>
+        <a onclick="goTo('sold')">Sold items</a>
+        <a onclick="goTo('wishlist')">Wishlist</a>
+        <a onclick="goTo('settings')">Settings</a>
+      </div>
+      <p class="eyebrow" style="margin-bottom:.6rem;">REVIEWS</p>
+      <div class="reviews" id="profileReviews"><p class="sub">No reviews yet.</p></div>
+      <button class="btn btn-ghost" onclick="logOut()">Log out</button>
+    </div>
+  </section>
+
+  
+  <section class="screen" id="settings">
+    <div class="window">
+      <div class="window-header"><div class="logo">SOUQ</div></div>
+      <p class="eyebrow">SETTINGS</p>
+      <div class="settings-row"><span>Dark mode</span><button class="mini-toggle on" id="settingsToggle" aria-label="Toggle dark mode"></button></div>
+      <div class="settings-row"><span>Email</span><span class="sub" style="margin:0;" id="settingsEmail"></span></div>
+      <div class="settings-row"><span>Username</span><span class="sub" style="margin:0;" id="settingsUser">nourfromdokki</span></div>
+      
+    </div>
+  </section>
+
+</div>
+
+<button type="button" class="fab" id="addProductFab" onclick="openAddProduct()" title="Sell something new" aria-label="Add a new listing">+</button>
+
+<div class="modal-backdrop" id="addProductBackdrop">
+  <div class="window ap-window">
+    <div class="window-header"><div class="logo">SOUQ</div><span class="crumb" style="cursor:pointer;" onclick="closeAddProduct()">✕ CLOSE</span></div>
+    <p class="eyebrow">NEW LISTING</p>
+    <h2 class="headline" style="margin-bottom:.9rem;">Sell something new</h2>
+    <div class="field">
+      <label>Photo</label>
+      <div class="ap-photo" id="apPhotoPreview" onclick="document.getElementById('apImageInput').click()">Tap to add a photo</div>
+      <input type="file" id="apImageInput" accept="image/*" style="display:none;">
+    </div>
+    <div class="field"><label>Item name</label><input id="apName" placeholder=""></div>
+    <div class="field"><label>Description</label><textarea id="apDesc" rows="3" placeholder="A short description for buyers"></textarea></div>
+    <div class="field">
+      <label>Listing type</label>
+      <div class="chiprow" id="apTypeRow">
+        <span class="chip is-active" data-type="sell">Sell</span><span class="chip" data-type="trade">Swap</span><span class="chip" data-type="both">Both</span>
+      </div>
+    </div>
+    <div class="field" id="apPriceField"><label>Price (EGP)</label><input id="apPrice" type="number" min="0" placeholder=""></div>
+    <div class="field"><label>Category</label>
+      <select id="apCategory" style="width:100%; padding:.7rem .85rem; border-radius:11px; border:1.5px solid color-mix(in srgb, var(--text-on-surface) 35%, transparent); background:transparent; color:var(--text-on-surface); font-family:var(--font-mono); font-size:.82rem;">
+        <option value="Home &amp; kitchen">Home &amp; kitchen</option><option value="Electronics">Electronics</option><option value="Plants">Plants</option><option value="Art">Art</option><option value="Other">Other</option>
+      </select>
+    </div>
+    <p class="sub" style="margin:.2rem 0 1rem;">Listed as <strong id="apSellerName">—</strong></p>
+    <p class="err" id="apErr"></p>
+    <div class="auth-foot">
+      <span class="muted"></span>
+      <button class="btn btn-gold" id="apSubmitBtn" onclick="submitAddProduct()">Post listing →</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  var GATED = ['home','assistant','chat','product','cart','wishlist','bought','sold','profile','settings'];
+  var NAV = [
+    {id:'home', label:'Home'}, {id:'assistant', label:'AI Assistant'}, {id:'wishlist', label:'Wishlist'}, {id:'cart', label:'Cart'}, {id:'chat', label:'Chat'},
+    {id:'bought', label:'Bought'}, {id:'sold', label:'Sold'}, {id:'profile', label:'Profile'}, {id:'settings', label:'Settings'}
+  ];
+
+  var currentUser = null;
+  try{ currentUser = JSON.parse(localStorage.getItem('souq-user') || 'null'); }catch(e){}
+  var isAuthed = !!currentUser;
+
+  var ALL_PRODUCTS = [];
+  var WISHLIST_IDS = new Set();
+  var LOCAL_WISHLIST = [];
+  var LOCAL_CART = [];
+  try{ LOCAL_WISHLIST = JSON.parse(localStorage.getItem('souq-wishlist') || '[]'); }catch(e){ LOCAL_WISHLIST = []; }
+  try{ LOCAL_CART = JSON.parse(localStorage.getItem('souq-cart') || '[]'); }catch(e){ LOCAL_CART = []; }
+  var currentProductId = null;
+  window.currentProductId = null;
+  WISHLIST_IDS = new Set(LOCAL_WISHLIST.map(Number));
+
+  async function api(path, opts){
+    var res = await fetch(path, opts);
+    if(!res.ok){
+      var body = {};
+      try{ body = await res.json(); }catch(e){}
+      throw new Error(body.detail || 'Something went wrong.');
+    }
+    return res.json();
+  }
+
+  function formatEGP(n){
+    if(!n) return '0 EGP';
+    return Math.round(n).toLocaleString() + ' EGP';
+  }
+
+  function thumbHTML(p, clickable){
+    var style = p.image_url ? ' style="background-image:url(\''+p.image_url+'\');background-size:cover;background-position:center;"' : '';
+    var click = clickable ? ' onclick="goToProduct('+p.id+')"' : '';
+    var inner = p.image_url ? '' : (p.icon || '📦');
+    return '<div class="thumb"'+style+click+'>'+inner+'</div>';
+  }
+
+  function card(p, i, variant){
+    var tagClass = p.listing_type === 'trade' ? 'trade' : (p.listing_type === 'both' ? 'both' : 'sell');
+    var tagLabel = p.listing_type === 'trade' ? 'SWAP' : (p.listing_type === 'both' ? 'SELL / SWAP' : 'SELL');
+    var actionHtml = '';
+    if(variant === 'shop'){
+      var fav = WISHLIST_IDS.has(Number(p.id));
+      actionHtml = '<span class="card-actions">'+
+        '<span class="iconbtn wishlist-heart'+(fav?' filled':'')+'" data-wish-id="'+p.id+'" onclick="event.stopPropagation(); toggleWish('+p.id+', null)" title="Add to wishlist">'+(fav?'♥':'♡')+'</span>'+
+        '<span class="iconbtn" onclick="event.stopPropagation(); addToCart('+p.id+')" title="Add to cart">🛒</span>'+
+        '</span>';
+    } else if(variant === 'wish'){
+      actionHtml = '<span class="iconbtn filled" onclick="event.stopPropagation(); toggleWish('+p.id+', null)" title="Remove from wishlist">♥</span>';
+    }
+    return '<article class="card rcard" style="--i:'+(i%3)+'">'+
+      '<span class="tag '+tagClass+'">'+tagLabel+'</span>'+
+      thumbHTML(p, true)+
+      '<div class="name" onclick="goToProduct('+p.id+')">'+p.name+'</div>'+
+      '<div class="seller">'+p.seller_name+'</div>'+
+      '<div class="row"><span class="price">'+p.price_label+'</span>'+actionHtml+'</div>'+
+    '</article>';
+  }
+
+  function orderCard(o, i, kind){
+    var p = o.product;
+    var tagClass, tagLabel;
+    if(kind === 'sold'){
+      tagClass = o.status === 'delivered' ? 'ok' : 'pending';
+      tagLabel = o.status === 'delivered' ? 'SOLD' : 'LISTED';
+    } else {
+      tagClass = o.status === 'delivered' ? 'ok' : 'pending';
+      tagLabel = o.status === 'delivered' ? 'DELIVERED' : 'ON THE WAY';
+    }
+    return '<article class="card rcard" style="--i:'+(i%3)+'">'+
+      '<span class="tag '+tagClass+'">'+tagLabel+'</span>'+
+      thumbHTML(p, true)+
+      '<div class="name" onclick="goToProduct('+p.id+')">'+p.name+'</div>'+
+      '<div class="seller">'+(kind === 'sold' ? 'You' : p.seller_name)+'</div>'+
+      '<div class="row"><span class="price">'+o.price_label+'</span></div>'+
+      (kind === 'bought' ? rateBoxHTML(o) : '')+
+    '</article>';
+  }
+
+  function fill(id, items){
+    var el = document.getElementById(id);
+    if(!el) return;
+    el.innerHTML = items.length ? items.join('') : '';
+  }
+
+  function emptyState(id, message){
+    var el = document.getElementById(id);
+    if(el && !el.children.length) el.innerHTML = '<p class="sub">'+message+'</p>';
+  }
+
+  async function loadProducts(){
+    try{
+      ALL_PRODUCTS = await api('/api/products');
+      renderHomeGrid('All');
+      refreshWishlist();
+      updateBadges();
+    }catch(e){ console.error(e); }
+  }
+
+  var currentCategory = 'All';
+  var currentSearch = '';
+  var currentSort = 'default';
+
+  function renderHomeGrid(category){
+    currentCategory = category || currentCategory || 'All';
+    var search = currentSearch.trim().toLowerCase();
+
+    var items = ALL_PRODUCTS.filter(function(p){
+      var categoryOk = !currentCategory || currentCategory === 'All' ||
+        String(p.category || '').trim().toLowerCase() === currentCategory.trim().toLowerCase();
+      var haystack = [
+        p.name, p.seller_name, p.category, p.description
+      ].map(function(v){ return String(v || '').toLowerCase(); }).join(' ');
+      var searchOk = !search || haystack.indexOf(search) !== -1;
+      return categoryOk && searchOk;
+    });
+
+    if(currentSort !== 'default'){
+      items = items.slice().sort(function(a,b){
+        if(currentSort === 'price-desc' || currentSort === 'price-asc'){
+          var pa = a.price_egp == null ? null : Number(a.price_egp);
+          var pb = b.price_egp == null ? null : Number(b.price_egp);
+          if(pa == null && pb == null) return 0;
+          if(pa == null) return 1;
+          if(pb == null) return -1;
+          return currentSort === 'price-desc' ? pb - pa : pa - pb;
+        }
+        var cmp = String(a.name || '').localeCompare(String(b.name || ''), undefined, {sensitivity:'base'});
+        return currentSort === 'name-asc' ? cmp : -cmp;
+      });
+    }
+
+    fill('homeGrid', items.map(function(p,i){ return card(p,i,'shop'); }));
+    emptyState('homeGrid', search ? 'No listings match your search.' : 'No listings in this category yet.');
+    revealCards(document.getElementById('home'));
+  }
+
+  window.goToProduct = async function(id){
+    currentProductId = id;
+    window.currentProductId = id;
+    goTo('product');
+    try{
+      var data = await api('/api/products/'+id);
+      renderProductDetail(data.product, data.related);
+      setPlainRating('pdSellerRating', data.seller_rating);
+    }catch(e){ console.error(e); }
+  };
+
+  function renderProductDetail(p, related){
+    document.getElementById('pdCategory').textContent = (p.category || '').toUpperCase();
+    document.getElementById('pdName').textContent = p.name;
+    document.getElementById('pdPrice').textContent = p.price_label;
+    document.getElementById('pdDesc').textContent = p.description || '';
+    document.getElementById('pdSellerName').textContent = p.seller_name;
+    var media = document.getElementById('pdMedia');
+    if(p.image_url){
+      media.style.backgroundImage = 'url(\''+p.image_url+'\')';
+      media.style.backgroundSize = 'cover';
+      media.style.backgroundPosition = 'center';
+      media.textContent = '';
+    } else {
+      media.style.backgroundImage = '';
+      media.textContent = p.icon || '📦';
+    }
+    var wishBtn = document.getElementById('pdWish');
+    var wished = WISHLIST_IDS.has(p.id);
+    wishBtn.classList.toggle('is-fav', wished);
+    wishBtn.textContent = wished ? '♥ Saved' : '♡ Save';
+    var delBtn = document.getElementById('pdDelete');
+    if(delBtn){
+      var isOwner = !!(currentUser && p.seller_id != null && Number(p.seller_id) === Number(currentUser.id));
+      delBtn.style.display = isOwner ? '' : 'none';
+    }
+    window.currentProductData = p;
+    var canDeal = !!(p.seller_id != null && !(currentUser && Number(p.seller_id) === Number(currentUser.id)));
+    ['pdBuy','pdContact'].forEach(function(bid){ var b = document.getElementById(bid); if(b) b.style.display = canDeal ? '' : 'none'; });
+    // swap-only items: no "Buy now", they are settled through trade offers
+    var swapOnly = p.listing_type === 'trade';
+    var buyBtn = document.getElementById('pdBuy'); if(buyBtn && swapOnly) buyBtn.style.display = 'none';
+    var pdOk = document.getElementById('pdOk'); if(pdOk) pdOk.textContent = '';
+    var pdErr = document.getElementById('pdErr'); if(pdErr) pdErr.textContent = '';
+    fill('relatedGrid', related.map(function(r,i){ return card(r,i,'shop'); }));
+    revealCards(document.getElementById('product'));
+  }
+
+  function saveLocalState(){
+    try{ localStorage.setItem('souq-wishlist', JSON.stringify(LOCAL_WISHLIST)); }catch(e){}
+    try{ localStorage.setItem('souq-cart', JSON.stringify(LOCAL_CART)); }catch(e){}
+  }
+
+  function animateNavIcon(id){
+    var el=document.getElementById(id);
+    if(!el) return;
+    el.classList.remove('pop'); void el.offsetWidth; el.classList.add('pop');
+    setTimeout(function(){el.classList.remove('pop');},650);
+  }
+
+  var CART_COUNT = 0;
+
+  function updateBadges(){
+    document.querySelectorAll('.wishlist-heart[data-wish-id]').forEach(function(el){
+      var on = WISHLIST_IDS.has(Number(el.dataset.wishId));
+      el.classList.toggle('filled', on);
+      el.textContent = on ? '♥' : '♡';
+    });
+    var w=document.getElementById('wishNavIcon'), c=document.getElementById('cartNavIcon');
+    if(w){ var old=w.querySelector('.badge'); if(old) old.remove(); if(WISHLIST_IDS.size){ var b=document.createElement('span'); b.className='badge'; b.textContent=WISHLIST_IDS.size; w.appendChild(b); } }
+    if(c){ var old2=c.querySelector('.badge'); if(old2) old2.remove(); if(CART_COUNT){ var b2=document.createElement('span'); b2.className='badge'; b2.textContent=CART_COUNT; c.appendChild(b2); } }
+  }
+
+  window.openWishlist=function(){ animateNavIcon('wishNavIcon'); goTo('wishlist'); };
+
+  function cartMode(it){
+    var p = it.product;
+    if(p.listing_type === 'trade') return 'trade';
+    if(p.listing_type === 'sell') return 'sale';
+    return it.mode === 'trade' ? 'trade' : 'sale';
+  }
+
+  function cartRowHTML(it, local){
+    var p = it.product, mode = cartMode(it);
+    var rid = local ? it.id : it.cart_item_id;
+    var rm = local ? 'removeLocalCart('+it.id+')' : 'removeFromCart('+it.cart_item_id+')';
+    var swap = '';
+    if(p.listing_type === 'both'){
+      swap = '<button class="btn btn-ghost cart-mini" onclick="setCartMode('+rid+',\''+(mode === 'trade' ? 'sale' : 'trade')+'\')">'+(mode === 'trade' ? 'Buy instead' : 'Trade instead')+'</button>';
+    }
+    var trade = '';
+    if(mode === 'trade'){
+      var st = it.offer ? it.offer.status : null;
+      if(st === 'pending'){
+        trade = '<div class="trade-box"><span class="offer-status">⏳ Offer sent — waiting for the seller</span><button class="btn btn-ghost cart-mini" onclick="openTradeChat('+p.id+')">Open chat</button></div>';
+      } else {
+        trade = '<div class="trade-box">'+
+          (st === 'rejected' ? '<span class="offer-status rejected">❌ Offer rejected — send a new one</span>' : '')+
+          '<input class="trade-note" id="tradeNote'+p.id+'" maxlength="300" placeholder="Note to seller (optional)">'+
+          '<label class="btn btn-gold cart-mini">📷 Upload photo of your item<input type="file" accept="image/*" hidden onchange="sendTradeOffer('+p.id+', this)"></label></div>';
+      }
+    }
+    return '<div class="cart-item">'+thumbHTML(p,false)+
+      '<div class="meta"><div class="name">'+esc(p.name)+'</div><div class="seller">'+esc(p.seller_name)+'</div>'+trade+'</div>'+
+      '<div class="cart-side">'+swap+'<span class="price">'+(mode === 'trade' ? 'Swap' : esc(p.price_label))+'</span>'+
+      '<span class="iconbtn" onclick="'+rm+'">✕</span></div></div>';
+  }
+
+  function renderCart(items, local){
+    var sale = items.filter(function(it){ return cartMode(it) === 'sale'; });
+    var trade = items.filter(function(it){ return cartMode(it) === 'trade'; });
+    document.getElementById('cartSaleList').innerHTML = sale.length ? sale.map(function(it){ return cartRowHTML(it, local); }).join('') : '<p class="sub">No items for sale.</p>';
+    document.getElementById('cartTradeList').innerHTML = trade.length ? trade.map(function(it){ return cartRowHTML(it, local); }).join('') : '<p class="sub">No items for trade.</p>';
+    var total = sale.reduce(function(sum,it){ return sum + (Number(it.product.price_egp)||0); }, 0);
+    CART_COUNT = items.length;
+    document.getElementById('cartCount').textContent = CART_COUNT+' item'+(CART_COUNT===1?'':'s');
+    var btn = document.getElementById('checkoutBtn');
+    btn.textContent = 'Checkout — '+formatEGP(total);
+    btn.disabled = !sale.length;
+    btn.style.opacity = sale.length ? '' : '.5';
+    updateBadges();
+  }
+
+  function renderLocalCart(){
+    if(!document.getElementById('cartSaleList')) return;
+    renderCart(LOCAL_CART, true);
+  }
+
+  async function refreshCart(){
+    if(!currentUser){ renderLocalCart(); return; }
+    try{
+      var data = await api('/api/cart/'+currentUser.id);
+      renderCart(data.items, false);
+    }catch(e){ renderLocalCart(); }
+  }
+
+  window.setCartMode = async function(id, mode){
+    if(!currentUser){
+      var it = LOCAL_CART.find(function(x){ return Number(x.id) === Number(id); });
+      if(it){ it.mode = mode; saveLocalState(); renderLocalCart(); }
+      return;
+    }
+    try{
+      await api('/api/cart/'+id+'/mode', {method:'PATCH', headers:{'Content-Type':'application/json'}, body:JSON.stringify({mode:mode})});
+      await refreshCart();
+    }catch(e){ console.error(e); }
+  };
+
+  window.openTradeChat = function(productId){
+    var p = ALL_PRODUCTS.find(function(x){ return Number(x.id) === Number(productId); });
+    if(!p || !p.seller_id) return;
+    CHAT = {other_id:p.seller_id, other_username:p.seller_name, product_id:p.id, product_name:p.name};
+    lastThreadSig = '';
+    goTo('chat');
+  };
+
+  // buyer picks a photo of the item they want to swap -> sent to the seller's chat
+  window.sendTradeOffer = function(productId, input){
+    if(!currentUser){ goTo('login'); return; }
+    var file = input.files && input.files[0]; if(!file) return;
+    var noteEl = document.getElementById('tradeNote'+productId);
+    var note = noteEl ? noteEl.value.trim() : '';
+    var err = document.getElementById('cartErr'); err.textContent = '';
+    var reader = new FileReader();
+    reader.onload = function(ev){
+      var img = new Image();
+      img.onerror = function(){ err.textContent = 'Please upload a photo of your item.'; };
+      img.onload = async function(){
+        var scale = Math.min(1, 800 / Math.max(img.width, img.height));
+        var canvas = document.createElement('canvas');
+        canvas.width = Math.round(img.width * scale);
+        canvas.height = Math.round(img.height * scale);
+        canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+        var dataUrl = canvas.toDataURL('image/jpeg', 0.72);
+        try{
+          await api('/api/trade-offers', {method:'POST', headers:JSON_HDR, body:JSON.stringify({customer_id:currentUser.id, product_id:productId, image_url:dataUrl, note:note})});
+          await refreshCart();
+          openTradeChat(productId);
+        }catch(e){ err.textContent = e.message; }
+      };
+      img.src = ev.target.result;
+    };
+    reader.readAsDataURL(file);
+    input.value = '';
+  };
+
+  window.addToCart=async function(productId){
+    if(!productId) return;
+    var p=ALL_PRODUCTS.find(function(x){return Number(x.id)===Number(productId);});
+    animateNavIcon('cartNavIcon');
+    var pdBtn=document.querySelector('#product #pd-actions');
+    var mainBtn=document.querySelector('.pd-actions .btn-gold');
+    if(mainBtn){mainBtn.classList.remove('added');void mainBtn.offsetWidth;mainBtn.classList.add('added');}
+    document.querySelectorAll('.card').forEach(function(c){
+      if(c.querySelector('[onclick*="addToCart('+productId+')"]')){c.classList.remove('cart-pulse');void c.offsetWidth;c.classList.add('cart-pulse');}
+    });
+    if(!currentUser){
+      if(p){ var ex=LOCAL_CART.find(function(x){return Number(x.id)===Number(productId);}); if(!ex) LOCAL_CART.push({id:Number(productId),quantity:1,product:p}); saveLocalState(); renderLocalCart(); }
+      return;
+    }
+    try{
+      await api('/api/cart',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({customer_id:currentUser.id,product_id:productId,quantity:1})});
+      await refreshCart();
+    }catch(e){
+      if(p){ var ex2=LOCAL_CART.find(function(x){return Number(x.id)===Number(productId);}); if(!ex2) LOCAL_CART.push({id:Number(productId),quantity:1,product:p}); saveLocalState(); renderLocalCart(); }
+    }
+  };
+
+  window.removeLocalCart=function(id){ LOCAL_CART=LOCAL_CART.filter(function(x){return Number(x.id)!==Number(id);}); saveLocalState(); renderLocalCart(); };
+
+  window.removeFromCart=async function(cartItemId){ try{await api('/api/cart/'+cartItemId,{method:'DELETE'});await refreshCart();}catch(e){ renderLocalCart(); } };
+
+  window.checkout=async function(){
+    if(!currentUser) return;
+    try{await api('/api/cart/checkout',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({customer_id:currentUser.id})});await refreshCart();await refreshBought();goTo('bought');}catch(e){console.error(e);} 
+  };
+
+  async function refreshWishlist(){
+    if(!currentUser){ WISHLIST_IDS=new Set(LOCAL_WISHLIST.map(Number)); fill('wishGrid',LOCAL_WISHLIST.map(function(id,i){var p=ALL_PRODUCTS.find(function(x){return Number(x.id)===Number(id);});return p?card(p,i,'wish'):'';})); emptyState('wishGrid','Nothing saved yet.'); updateBadges(); revealCards(document.getElementById('wishlist')); return; }
+    try{
+      var items=await api('/api/wishlist/'+currentUser.id);
+      WISHLIST_IDS=new Set(items.map(function(p){return Number(p.id);}));
+      LOCAL_WISHLIST=Array.from(WISHLIST_IDS); saveLocalState();
+      fill('wishGrid',items.map(function(p,i){return card(p,i,'wish');}));
+      emptyState('wishGrid','Nothing saved yet.');
+    }catch(e){
+      WISHLIST_IDS=new Set(LOCAL_WISHLIST.map(Number));
+      fill('wishGrid',LOCAL_WISHLIST.map(function(id,i){var p=ALL_PRODUCTS.find(function(x){return Number(x.id)===Number(id);});return p?card(p,i,'wish'):'';}));
+      emptyState('wishGrid','Nothing saved yet.');
+    }
+    updateBadges();
+    revealCards(document.getElementById('wishlist'));
+  }
+
+  window.toggleWish=async function(productId,btnEl){
+    if(!productId) return;
+    var id=Number(productId);
+    var wasActive=WISHLIST_IDS.has(id);
+    var active=!wasActive;
+
+    function applyLocal(isActive){
+      if(isActive) WISHLIST_IDS.add(id); else WISHLIST_IDS.delete(id);
+      LOCAL_WISHLIST=Array.from(WISHLIST_IDS); saveLocalState();
+      if(btnEl){ btnEl.classList.toggle('is-fav',isActive); btnEl.textContent=isActive?'♥ Saved':'♡ Save'; }
+    }
+
+    applyLocal(active);
+    if(btnEl){ btnEl.classList.remove('heart-pop'); void btnEl.offsetWidth; btnEl.classList.add('heart-pop'); }
+    animateNavIcon('wishNavIcon'); updateBadges();
+
+    if(!currentUser){ await refreshWishlist(); return; }
+
+    try{
+      var res=await api('/api/wishlist/toggle',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({customer_id:currentUser.id,product_id:id})});
+      if(res.active!==active) applyLocal(res.active);
+    }catch(e){
+      applyLocal(wasActive);
+    }
+    await refreshWishlist();
+  };
+
+  window.deleteProduct = async function(productId){
+    if(!productId || !currentUser) return;
+    var pdErr = document.getElementById('pdErr');
+    if(!confirm(window.souqT ? window.souqT('Delete this listing? This can\'t be undone.') : 'Delete this listing? This can\'t be undone.')) return;
+    try{
+      await api('/api/products/'+productId+'?customer_id='+currentUser.id, {method:'DELETE'});
+      ALL_PRODUCTS = ALL_PRODUCTS.filter(function(x){ return Number(x.id) !== Number(productId); });
+      WISHLIST_IDS.delete(Number(productId));
+      LOCAL_WISHLIST = Array.from(WISHLIST_IDS); saveLocalState();
+      LOCAL_CART = LOCAL_CART.filter(function(x){ return Number(x.id) !== Number(productId); });
+      saveLocalState();
+      goTo('home');
+    }catch(e){
+      if(pdErr) pdErr.textContent = e.message;
+    }
+  };
+
+  async function refreshBought(){
+    if(!currentUser) return;
+    try{
+      var orders = await api('/api/orders/bought/'+currentUser.id);
+      fill('boughtGrid', orders.map(function(o,i){ return orderCard(o,i,'bought'); }));
+      emptyState('boughtGrid', 'No purchases yet.');
+    }catch(e){ console.error(e); }
+    revealCards(document.getElementById('bought'));
+  }
+
+  async function refreshSold(){
+    if(!currentUser) return;
+    try{
+      var orders = await api('/api/orders/sold/'+currentUser.id);
+      fill('soldGrid', orders.map(function(o,i){ return orderCard(o,i,'sold'); }));
+      emptyState('soldGrid', 'Nothing sold yet.');
+    }catch(e){ console.error(e); }
+    revealCards(document.getElementById('sold'));
+  }
+
+  var apImageData = null;
+  var apListingType = 'sell';
+
+  function resetAddProductForm(){
+    document.getElementById('apName').value = '';
+    document.getElementById('apDesc').value = '';
+    document.getElementById('apPrice').value = '';
+    document.getElementById('apCategory').value = 'Home & kitchen';
+    document.getElementById('apErr').textContent = '';
+    document.getElementById('apImageInput').value = '';
+    var preview = document.getElementById('apPhotoPreview');
+    preview.style.backgroundImage = '';
+    preview.textContent = 'Tap to add a photo';
+    apImageData = null;
+    apListingType = 'sell';
+    document.querySelectorAll('#apTypeRow .chip').forEach(function(c){ c.classList.toggle('is-active', c.dataset.type === 'sell'); });
+    document.getElementById('apPriceField').style.display = '';
+  }
+
+  window.openAddProduct = function(){
+    if(!currentUser) { goTo('login'); return; }
+    resetAddProductForm();
+    document.getElementById('apSellerName').textContent = currentUser.username;
+    document.getElementById('addProductBackdrop').classList.add('show');
+    var fab = document.getElementById('addProductFab');
+    fab.classList.remove('pop'); void fab.offsetWidth; fab.classList.add('pop');
+  };
+
+  window.closeAddProduct = function(){
+    document.getElementById('addProductBackdrop').classList.remove('show');
+  };
+
+  document.querySelectorAll('#apTypeRow .chip').forEach(function(chip){
+    chip.addEventListener('click', function(){
+      document.querySelectorAll('#apTypeRow .chip').forEach(function(c){ c.classList.remove('is-active'); });
+      chip.classList.add('is-active');
+      apListingType = chip.dataset.type;
+      document.getElementById('apPriceField').style.display = apListingType === 'trade' ? 'none' : '';
+    });
+  });
+
+  var apImageInput = document.getElementById('apImageInput');
+  if(apImageInput){
+    apImageInput.addEventListener('change', function(){
+      var file = apImageInput.files && apImageInput.files[0];
+      if(!file) return;
+      var reader = new FileReader();
+      reader.onload = function(ev){
+        var img = new Image();
+        img.onload = function(){
+          var maxDim = 500;
+          var scale = Math.min(1, maxDim / Math.max(img.width, img.height));
+          var canvas = document.createElement('canvas');
+          canvas.width = Math.round(img.width * scale);
+          canvas.height = Math.round(img.height * scale);
+          var ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          apImageData = canvas.toDataURL('image/jpeg', 0.62);
+          var preview = document.getElementById('apPhotoPreview');
+          preview.style.backgroundImage = 'url(\''+apImageData+'\')';
+          preview.textContent = '';
+        };
+        img.src = ev.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  window.submitAddProduct = async function(){
+    var err = document.getElementById('apErr');
+    var name = document.getElementById('apName').value.trim();
+    var desc = document.getElementById('apDesc').value.trim();
+    var category = document.getElementById('apCategory').value;
+    var priceVal = document.getElementById('apPrice').value;
+    err.textContent = '';
+
+    if(!name){ err.textContent = 'Give your listing a name.'; return; }
+    if(apListingType !== 'trade' && (!priceVal || Number(priceVal) <= 0)){ err.textContent = 'Enter a price, or switch to Trade.'; return; }
+
+    var priceEgp = apListingType !== 'trade' ? Number(priceVal) : null;
+    var priceLabel = apListingType === 'sell' ? formatEGP(priceEgp) : (apListingType === 'both' ? formatEGP(priceEgp) + ' / Swap' : 'Swap only');
+
+    var btn = document.getElementById('apSubmitBtn');
+    btn.disabled = true;
+    try{
+      var payload = {
+        customer_id: currentUser.id,
+        name: name,
+        description: desc,
+        category: category,
+        listing_type: apListingType,
+        price_egp: priceEgp,
+        price_label: priceLabel,
+        image_url: apImageData
+      };
+      var product = await api('/api/products', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify(payload)
+      });
+      ALL_PRODUCTS.unshift(product);
+      renderHomeGrid(currentCategory);
+      closeAddProduct();
+    }catch(e){
+      err.textContent = e.message;
+    }finally{
+      btn.disabled = false;
+    }
+  };
+
+  function applyUserInfo(user){
+    if(!user) return;
+    var pe = document.getElementById('profileEmail'), se = document.getElementById('settingsEmail');
+    if(pe) pe.textContent = user.email || '';
+    if(se) se.textContent = user.email || '';
+  }
+
+  async function refreshProfileStats(){
+    if(!currentUser) return;
+    try{
+      var st = await api('/api/profile-stats/'+currentUser.id);
+      var l = document.getElementById('profileListings'), so = document.getElementById('profileSold');
+      if(l) l.textContent = st.listings;
+      if(so) so.textContent = st.sold;
+      setPlainRating('profileRating', st.rating);
+      var rv = document.getElementById('profileReviews');
+      if(rv) rv.innerHTML = (st.reviews && st.reviews.length) ? st.reviews.map(function(r){
+        return '<div class="review"><div class="rv-top"><b>'+esc(r.buyer)+'</b><span class="rv-stars">'+stars5(r.stars)+'</span></div>'+
+          (r.product_name ? '<div class="rv-prod">'+esc(r.product_name)+'</div>' : '')+
+          (r.comment ? '<div class="rv-text">'+esc(r.comment)+'</div>' : '')+'</div>';
+      }).join('') : '<p class="sub">No reviews yet.</p>';
+    }catch(e){ console.error(e); }
+  }
+
+  var navlinks = document.getElementById('navlinks');
+  NAV.forEach(function(n){
+    var b = document.createElement('button');
+    b.textContent = n.label;
+    b.dataset.target = n.id;
+    b.addEventListener('click', function(){ goTo(n.id); });
+    navlinks.appendChild(b);
+  });
+
+  function setNavActive(id){
+    navlinks.querySelectorAll('button').forEach(function(b){ b.classList.toggle('active', b.dataset.target===id); });
+  }
+
+  var revealIO = null;
+  function revealCards(screenEl){
+    if(screenEl.id === 'home' && 'IntersectionObserver' in window){
+      // cards animate in as you scroll down the home page
+      if(revealIO) revealIO.disconnect();
+      var cards = screenEl.querySelectorAll('.rcard');
+      cards.forEach(function(el){ el.classList.remove('in','settled'); });
+      revealIO = new IntersectionObserver(function(entries){
+        entries.forEach(function(en){
+          if(!en.isIntersecting) return;
+          var el = en.target; revealIO.unobserve(el);
+          el.classList.add('in');
+          setTimeout(function(){ el.classList.add('settled'); }, 1300);
+        });
+      }, {root: screenEl, threshold: 0.12, rootMargin: '0px 0px -6% 0px'});
+      cards.forEach(function(el){ revealIO.observe(el); });
+      return;
+    }
+    screenEl.querySelectorAll('.rcard').forEach(function(el){ el.classList.remove('in'); });
+    requestAnimationFrame(function(){
+      screenEl.querySelectorAll('.rcard').forEach(function(el){ el.classList.add('in'); });
+    });
+  }
+
+  window.goTo = function(id){
+    if(GATED.indexOf(id) !== -1 && !isAuthed){
+      id = 'login';
+    }
+    document.querySelectorAll('.screen').forEach(function(s){ s.classList.remove('active'); });
+    var target = document.getElementById(id);
+    target.classList.add('active');
+    target.scrollTop = 0;
+    setNavActive(id);
+    revealCards(target);
+    document.getElementById('topnav').classList.toggle('show', isAuthed);
+    document.body.classList.toggle('authed', isAuthed);
+    var fab = document.getElementById('addProductFab');
+    if(fab) fab.classList.toggle('show', isAuthed && id === 'home');
+
+    chatOpen = (id === 'chat');
+    if(id === 'cart') refreshCart();
+    else if(id === 'chat') openChatScreen();
+    else if(id === 'wishlist') refreshWishlist();
+    else if(id === 'bought') refreshBought();
+    else if(id === 'sold') refreshSold();
+    else if(id === 'home') renderHomeGrid('All');
+    else if(id === 'profile') refreshProfileStats();
+    else if(id === 'assistant') aiOpen();
+    var sb = document.getElementById('scrollBar'); if(sb) sb.style.width = '0';
+  };
+
+  function setAuthed(user){
+    currentUser = user;
+    isAuthed = true;
+    try{ localStorage.setItem('souq-user', JSON.stringify(user)); }catch(e){}
+    var nameEl = document.getElementById('profileName');
+    var settingsUser = document.getElementById('settingsUser');
+    if(nameEl) nameEl.textContent = user.username;
+    if(settingsUser) settingsUser.textContent = user.username;
+    applyUserInfo(user);
+    refreshWishlist();
+    refreshNotifications();
+    goTo('home');
+  }
+
+  window.submitSignup = async function(){
+    var user = document.getElementById('suUser').value.trim();
+    var email = document.getElementById('suEmail').value.trim();
+    var pass = document.getElementById('suPass').value;
+    var confirm = document.getElementById('suConfirm').value;
+    var err = document.getElementById('suErr');
+    if(!user || !email || !pass){ err.textContent = 'Fill in every field to continue.'; return; }
+    if(pass.length < 6){ err.textContent = 'Password must be at least 6 characters.'; return; }
+    if(pass !== confirm){ err.textContent = 'Passwords don\'t match.'; return; }
+    err.textContent = '';
+    try{
+      var res = await api('/api/signup', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({username:user, email:email, password:pass})
+      });
+      setAuthed(res);
+    }catch(e){ err.textContent = e.message; }
+  };
+
+  window.submitLogin = async function(){
+    var user = document.getElementById('liUser').value.trim();
+    var pass = document.getElementById('liPass').value;
+    var err = document.getElementById('liErr');
+    if(!user || !pass){ err.textContent = 'Enter your username and password.'; return; }
+    err.textContent = '';
+    try{
+      var res = await api('/api/login', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({username:user, password:pass})
+      });
+      setAuthed(res);
+    }catch(e){ err.textContent = e.message; }
+  };
+
+  window.submitResetPassword = async function(){
+    var user = document.getElementById('rpUser').value.trim();
+    var email = document.getElementById('rpEmail').value.trim();
+    var pass = document.getElementById('rpPass').value;
+    var confirm = document.getElementById('rpConfirm').value;
+    var err = document.getElementById('rpErr');
+
+    if(!user || !email || !pass || !confirm){
+      err.textContent = 'Fill in every field to continue.';
+      return;
+    }
+    if(pass.length < 6){
+      err.textContent = 'Password must be at least 6 characters.';
+      return;
+    }
+    if(pass !== confirm){
+      err.textContent = 'Passwords don\'t match.';
+      return;
+    }
+
+    err.textContent = '';
+    try{
+      await api('/api/reset-password', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({username:user, email:email, new_password:pass})
+      });
+      document.getElementById('rpPass').value = '';
+      document.getElementById('rpConfirm').value = '';
+      document.getElementById('liUser').value = user;
+      document.getElementById('liPass').value = '';
+      document.getElementById('liErr').textContent = 'Password changed. Log in with your new password.';
+      goTo('login');
+    }catch(e){
+      err.textContent = e.message;
+    }
+  };
+
+  window.logOut = function(){
+    isAuthed = false;
+    currentUser = null;
+    try{ localStorage.removeItem('souq-user'); }catch(e){}
+    setNotifBadge(0);
+    goTo('hero');
+  };
+
+  /* ---------- Buy now / Contact / Notifications ---------- */
+  function esc(t){ return String(t == null ? '' : t).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+  var JSON_HDR = {'Content-Type':'application/json'};
+
+  window.buyNow = async function(){
+    if(!currentUser){ goTo('login'); return; }
+    if(!window.currentProductId) return;
+    if(window.currentProductData && window.currentProductData.listing_type === 'trade') return;
+    if(!confirm(souqT('Buy this item now?'))) return;
+    var pdErr = document.getElementById('pdErr'); if(pdErr) pdErr.textContent = '';
+    try{
+      await api('/api/buy-now', {method:'POST', headers:JSON_HDR, body:JSON.stringify({customer_id:currentUser.id, product_id:window.currentProductId})});
+      await refreshCart();
+      goTo('bought');
+    }catch(e){ if(pdErr) pdErr.textContent = e.message; }
+  };
+
+  /* ---------- Seller ratings ---------- */
+  function stars5(n){ var t = ''; for(var k = 1; k <= 5; k++) t += (k <= n ? '★' : '☆'); return t; }
+
+  function setPlainRating(id, r){
+    var el = document.getElementById(id); if(!el) return;
+    el.textContent = (r && r.count) ? Number(r.average).toFixed(1)+' ★ ('+r.count+')' : '-';
+  }
+
+  function starsHTML(n, interactive, orderId){
+    var out = '';
+    for(var k = 1; k <= 5; k++){
+      out += interactive
+        ? '<button type="button" class="star" style="--k:'+(k-1)+'" aria-label="'+k+' / 5" onclick="pickStar('+orderId+','+k+',this)">☆</button>'
+        : '<span class="star'+(k <= n ? ' on' : '')+'" style="--k:'+(k-1)+'">'+(k <= n ? '★' : '☆')+'</span>';
+    }
+    return '<div class="stars">'+out+'</div>';
+  }
+
+  function rateBoxHTML(o){
+    if(o.rating){
+      return '<div class="rate-box" id="rate'+o.order_id+'"><div class="rate-title">Your rating</div>'+starsHTML(o.rating.stars, false)+
+        (o.rating.comment ? '<div class="rate-comment">“'+esc(o.rating.comment)+'”</div>' : '')+'</div>';
+    }
+    if(!o.product || !o.product.seller_id) return '';
+    return '<div class="rate-box" id="rate'+o.order_id+'"><div class="rate-title">Rate the seller</div>'+starsHTML(0, true, o.order_id)+
+      '<div class="rate-form"><div><textarea id="rateText'+o.order_id+'" maxlength="500" rows="2" placeholder="Write a comment (optional)"></textarea>'+
+      '<button type="button" class="btn btn-gold cart-mini" onclick="submitRating('+o.order_id+')">Submit</button>'+
+      '<p class="err" id="rateErr'+o.order_id+'"></p></div></div></div>';
+  }
+
+  function sparkle(el){
+    for(var i = 0; i < 8; i++){
+      var p = document.createElement('i'); p.className = 'spark';
+      var a = Math.PI * 2 * i / 8, d = 20 + Math.random() * 12;
+      p.style.setProperty('--dx', Math.cos(a) * d + 'px'); p.style.setProperty('--dy', Math.sin(a) * d + 'px');
+      el.appendChild(p);
+      setTimeout((function(x){ return function(){ x.remove(); }; })(p), 700);
+    }
+  }
+
+  window.pickStar = function(orderId, k, btn){
+    var box = document.getElementById('rate'+orderId); if(!box) return;
+    box.dataset.stars = k;
+    box.querySelectorAll('.star').forEach(function(st, i){
+      st.classList.remove('on'); void st.offsetWidth;
+      var on = i < k; st.classList.toggle('on', on); st.textContent = on ? '★' : '☆';
+    });
+    sparkle(btn);
+    box.querySelector('.rate-form').classList.add('open');
+    setTimeout(function(){ var t = document.getElementById('rateText'+orderId); if(t) t.focus({preventScroll:true}); }, 400);
+  };
+
+  window.submitRating = async function(orderId){
+    var box = document.getElementById('rate'+orderId), err = document.getElementById('rateErr'+orderId);
+    if(!box || !currentUser) return;
+    var stars = Number(box.dataset.stars) || 0;
+    if(!stars){ err.textContent = 'Pick a star rating first.'; return; }
+    var comment = (document.getElementById('rateText'+orderId).value || '').trim();
+    err.textContent = '';
+    try{
+      var r = await api('/api/ratings', {method:'POST', headers:JSON_HDR, body:JSON.stringify({customer_id:currentUser.id, order_id:orderId, stars:stars, comment:comment})});
+      var tmp = document.createElement('div');
+      tmp.innerHTML = rateBoxHTML({order_id:orderId, product:{seller_id:1}, rating:r.rating});
+      var done = tmp.firstChild; done.classList.add('rate-done');
+      done.insertAdjacentHTML('beforeend', '<div class="rate-thanks">Thanks for your feedback</div>');
+      box.replaceWith(done);
+      sparkle(done.querySelector('.star.on:last-of-type') || done);
+    }catch(e){ err.textContent = e.message; }
+  };
+
+  /* ---------- AI shopping assistant ---------- */
+  var AIS = {hist:[], asked:0, busy:false};
+
+  function aiScroll(){ var b = document.getElementById('aiMsgs'); b.scrollTop = b.scrollHeight; }
+  function aiClearChips(){ document.querySelectorAll('#aiMsgs .ai-chips').forEach(function(c){ c.remove(); }); }
+
+  function aiBubble(who, text){
+    var d = document.createElement('div'); d.className = 'bubble '+who; d.textContent = text;
+    document.getElementById('aiMsgs').appendChild(d); aiScroll(); return d;
+  }
+
+  function aiChips(list){
+    if(!list || !list.length) return;
+    var row = document.createElement('div'); row.className = 'chiprow ai-chips';
+    list.forEach(function(t){
+      var c = document.createElement('span'); c.className = 'chip'; c.textContent = t;
+      c.addEventListener('click', function(){ window.aiSend(t); });
+      row.appendChild(c);
+    });
+    document.getElementById('aiMsgs').appendChild(row); aiScroll();
+  }
+
+  function aiResults(list){
+    if(!list || !list.length) return;
+    var g = document.createElement('div'); g.className = 'grid reveal-grid';
+    g.innerHTML = list.map(function(p, i){ return card(p, i, 'shop'); }).join('');
+    var box = document.getElementById('aiMsgs'); box.appendChild(g);
+    var cs = g.querySelectorAll('.rcard');
+    requestAnimationFrame(function(){ requestAnimationFrame(function(){ cs.forEach(function(c){ c.classList.add('in'); }); }); });
+    setTimeout(function(){ cs.forEach(function(c){ c.classList.add('settled'); }); }, 1400);
+    box.scrollTo({top: Math.max(0, g.offsetTop - 12), behavior:'smooth'});
+  }
+
+  function aiOpen(){
+    if(document.getElementById('aiMsgs').children.length) return;
+    aiBubble('them', 'Hi! Tell me what you need and your budget, and I\'ll find some options for you.');
+    aiChips(['موبايل للدراسة في حدود 8000', 'Laptop under 15000 EGP', 'نباتات للبيت']);
+  }
+
+  window.aiReset = function(){
+    AIS.hist = []; AIS.asked = 0; AIS.busy = false;
+    document.getElementById('aiMsgs').innerHTML = '';
+    aiOpen();
+  };
+
+  window.aiSend = async function(preset){
+    var ta = document.getElementById('aiText');
+    var text = (typeof preset === 'string' ? preset : ta.value).trim();
+    if(!text || AIS.busy) return;
+    ta.value = ''; AIS.busy = true; aiClearChips();
+    aiBubble('me', text); AIS.hist.push({role:'user', content:text});
+    var typing = aiBubble('them', ''); typing.innerHTML = '<span class="typing"><i></i><i></i><i></i></span>';
+    try{
+      var r = await api('/api/assistant', {method:'POST', headers:JSON_HDR, body:JSON.stringify({messages:AIS.hist, asked:AIS.asked, customer_id:currentUser ? currentUser.id : null})});
+      typing.remove();
+      aiBubble('them', r.reply); AIS.hist.push({role:'assistant', content:r.reply});
+      if(r.type === 'ask'){ AIS.asked++; aiChips(r.options); }
+      else { AIS.asked = 0; aiResults(r.products); }
+    }catch(e){
+      typing.remove(); AIS.hist.pop();
+      aiBubble('them', e.message);
+    }
+    AIS.busy = false;
+  };
+  var aiTextEl = document.getElementById('aiText');
+  if(aiTextEl) aiTextEl.addEventListener('keydown', function(e){
+    if(e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); window.aiSend(); }
+  });
+
+  /* ---------- Chat ---------- */
+  var CHAT = null, CHAT_ITEMS = [], chatOpen = false, chatTick = 0, lastThreadSig = '';
+
+  function setNotifBadge(n){
+    var el = document.getElementById('notifNavIcon'); if(!el) return;
+    var old = el.querySelector('.badge'); if(old) old.remove();
+    if(n > 0){ var b = document.createElement('span'); b.className = 'badge notif'; b.textContent = n > 99 ? '99+' : n; el.appendChild(b); }
+  }
+  async function refreshNotifications(){
+    if(!currentUser) return;
+    try{ var d = await api('/api/chats/'+currentUser.id+'/unread'); setNotifBadge(d.unread); }catch(e){}
+  }
+  function fmtTime(t){
+    if(!t) return ''; var d = new Date(t); if(isNaN(d)) return '';
+    return d.toLocaleString([], {month:'short', day:'numeric', hour:'2-digit', minute:'2-digit'});
+  }
+  function sameChat(c){ return CHAT && Number(c.other_id) === Number(CHAT.other_id) && Number(c.product_id) === Number(CHAT.product_id); }
+
+  async function loadChatList(){
+    if(!currentUser) return;
+    var el = document.getElementById('chatList'); if(!el) return;
+    try{
+      var items = await api('/api/chats/'+currentUser.id);
+      if(CHAT && !items.some(sameChat)){
+        items.unshift({other_id:CHAT.other_id, other_username:CHAT.other_username, product_id:CHAT.product_id, product_name:CHAT.product_name, last_body:'', last_time:null, unread:0});
+      }
+      CHAT_ITEMS = items;
+      if(!items.length){ el.innerHTML = '<p class="sub" style="padding:1rem;">No conversations yet.</p>'; return; }
+      el.innerHTML = items.map(function(c, i){
+        var unread = (c.unread && !sameChat(c)) ? '<span class="cr-badge">'+c.unread+'</span>' : '';
+        return '<div class="chat-row'+(sameChat(c)?' active':'')+'" onclick="pickChat('+i+')">'+
+          '<div class="cr-top"><span class="cr-name">'+esc(c.other_username)+'</span>'+(unread || '<span class="cr-time">'+esc(fmtTime(c.last_time))+'</span>')+'</div>'+
+          '<div class="cr-prod">'+esc(c.product_name)+'</div>'+
+          '<div class="cr-last">'+esc(c.last_body)+'</div></div>';
+      }).join('');
+    }catch(e){ console.error(e); }
+  }
+
+  window.pickChat = function(i){
+    var c = CHAT_ITEMS[i]; if(!c) return;
+    CHAT = {other_id:c.other_id, other_username:c.other_username, product_id:c.product_id, product_name:c.product_name};
+    lastThreadSig = '';
+    loadThread(true); loadChatList();
+  };
+  window.chatBack = function(){
+    CHAT = null; lastThreadSig = '';
+    document.getElementById('chatWrap').classList.remove('show-thread');
+    document.getElementById('chatThread').style.display = 'none';
+    document.getElementById('chatEmpty').style.display = '';
+    loadChatList();
+  };
+
+  async function loadThread(force){
+    var wrap = document.getElementById('chatWrap');
+    var thread = document.getElementById('chatThread'), empty = document.getElementById('chatEmpty');
+    if(!currentUser || !CHAT){ thread.style.display = 'none'; empty.style.display = ''; wrap.classList.remove('show-thread'); return; }
+    var mine = CHAT;
+    thread.style.display = 'flex'; empty.style.display = 'none'; wrap.classList.add('show-thread');
+    document.getElementById('chatTitle').textContent = mine.other_username;
+    var sub = document.getElementById('chatSub');
+    sub.textContent = mine.product_name;
+    sub.onclick = function(){ goToProduct(mine.product_id); };
+    try{
+      var msgs = await api('/api/chats/'+currentUser.id+'/thread?other_id='+mine.other_id+'&product_id='+mine.product_id);
+      if(CHAT !== mine) return;
+      var sig = msgs.length + ':' + (msgs.length ? msgs[msgs.length-1].id : 0);
+      if(!force && sig === lastThreadSig) return;
+      lastThreadSig = sig;
+      var box = document.getElementById('chatMsgs');
+      var nearBottom = force || (box.scrollHeight - box.scrollTop - box.clientHeight < 80);
+      box.innerHTML = msgs.length ? msgs.map(function(m){
+        var img = m.has_image ? '<img class="bubble-img" src="/api/messages/'+m.id+'/image" alt="" onclick="window.open(this.src)">' : '';
+        var offer = '';
+        if(m.offer){
+          if(m.offer.can_respond){
+            offer = '<div class="offer-actions"><button class="btn btn-gold cart-mini" onclick="respondOffer('+m.offer.id+',\'accept\')">Accept</button><button class="btn btn-ghost cart-mini" onclick="respondOffer('+m.offer.id+',\'reject\')">Reject</button></div>';
+          } else {
+            var lbl = m.offer.status === 'accepted' ? '✅ Accepted' : (m.offer.status === 'rejected' ? '❌ Rejected' : '⏳ Waiting for the seller');
+            offer = '<div class="offer-status '+esc(m.offer.status)+'" style="margin-top:.35rem;">'+lbl+'</div>';
+          }
+        }
+        return '<div class="bubble '+(m.mine?'me':'them')+'">'+img+esc(m.body)+offer+'<span class="t">'+esc(fmtTime(m.created_at))+'</span></div>';
+      }).join('') : '<p class="chat-empty">No messages yet. Say hi!</p>';
+      if(nearBottom) box.scrollTop = box.scrollHeight;
+      refreshNotifications();
+    }catch(e){ console.error(e); }
+  }
+
+  window.respondOffer = async function(offerId, action){
+    var err = document.getElementById('chatErr'); err.textContent = '';
+    try{
+      await api('/api/trade-offers/'+offerId+'/respond', {method:'POST', headers:JSON_HDR, body:JSON.stringify({customer_id:currentUser.id, action:action})});
+      lastThreadSig = '';
+      await loadThread(true); loadChatList();
+    }catch(e){ err.textContent = e.message; }
+  };
+
+  window.sendChat = async function(){
+    if(!currentUser || !CHAT) return;
+    var ta = document.getElementById('chatText'), err = document.getElementById('chatErr'), btn = document.getElementById('chatSend');
+    var body = ta.value.trim(); if(!body) return;
+    err.textContent = ''; btn.disabled = true;
+    try{
+      await api('/api/messages', {method:'POST', headers:JSON_HDR, body:JSON.stringify({sender_id:currentUser.id, recipient_id:CHAT.other_id, product_id:CHAT.product_id, body:body})});
+      ta.value = '';
+      await loadThread(true); loadChatList();
+    }catch(e){ err.textContent = e.message; }
+    btn.disabled = false; ta.focus();
+  };
+  var chatTextEl = document.getElementById('chatText');
+  if(chatTextEl) chatTextEl.addEventListener('keydown', function(e){
+    if(e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); sendChat(); }
+  });
+
+  function openChatScreen(){ loadChatList(); loadThread(true); }
+  window.openChatPage = function(){ animateNavIcon('notifNavIcon'); CHAT = null; lastThreadSig = ''; goTo('chat'); };
+
+  // Contact seller -> open the chat with the seller about this product
+  window.openContact = function(){
+    if(!currentUser){ goTo('login'); return; }
+    var p = window.currentProductData; if(!p || p.seller_id == null) return;
+    CHAT = {other_id:p.seller_id, other_username:p.seller_name, product_id:p.id, product_name:p.name};
+    lastThreadSig = '';
+    goTo('chat');
+  };
+
+  // live updates: every 4s while the chat page is open, every 30s otherwise (badge)
+  setInterval(function(){
+    if(!currentUser) return;
+    if(chatOpen){ loadChatList(); loadThread(false); }
+    else if(++chatTick % 8 === 0){ refreshNotifications(); }
+  }, 4000);
+
+  var chiprow = document.querySelector('.chiprow');
+  if(chiprow){
+    chiprow.querySelectorAll('.chip').forEach(function(chip){
+      chip.addEventListener('click', function(){
+        chiprow.querySelectorAll('.chip').forEach(function(c){ c.classList.remove('is-active'); });
+        chip.classList.add('is-active');
+        currentCategory = chip.dataset.cat || chip.textContent.trim();
+        renderHomeGrid(currentCategory);
+      });
+    });
+  }
+
+  var homeSearch = document.getElementById('homeSearch');
+  if(homeSearch){
+    homeSearch.addEventListener('input', function(){
+      currentSearch = homeSearch.value;
+      renderHomeGrid(currentCategory);
+    });
+  }
+
+  var homeSort = document.getElementById('homeSort');
+  if(homeSort){
+    homeSort.addEventListener('change', function(){
+      currentSort = homeSort.value;
+      renderHomeGrid(currentCategory);
+    });
+  }
+
+  function applyTheme(theme){
+    document.documentElement.setAttribute('data-theme', theme);
+    document.getElementById('themeLabel').textContent = theme==='light' ? 'LIGHT':'DARK';
+    var st = document.getElementById('settingsToggle');
+    if(st) st.classList.toggle('on', theme==='dark');
+    try{ localStorage.setItem('souq-theme', theme); }catch(e){}
+  }
+  var startTheme = 'dark';
+  try{ var saved = localStorage.getItem('souq-theme'); if(saved==='light'||saved==='dark') startTheme = saved; }catch(e){}
+  applyTheme(startTheme);
+  function toggleTheme(){ applyTheme(document.documentElement.getAttribute('data-theme')==='dark' ? 'light':'dark'); }
+  document.getElementById('themeBtn').addEventListener('click', toggleTheme);
+  var settingsToggle = document.getElementById('settingsToggle');
+  if(settingsToggle) settingsToggle.addEventListener('click', toggleTheme);
+
+  document.getElementById('topnav').classList.toggle('show', isAuthed);
+  document.body.classList.toggle('authed', isAuthed);
+
+  
+  var I18N_AR = {
+    'home':'الرئيسية','wishlist':'المفضلة','cart':'السلة','bought':'المشتريات','sold':'مباع','profile':'الملف الشخصي','settings':'الإعدادات',
+    'dark':'داكن','light':'فاتح','toggle theme':'تبديل المظهر','language':'اللغة','toggle dark mode':'تبديل الوضع الداكن',
+    'a marketplace for the everyday':'سوق لاحتياجات الحياة اليومية',
+    "buy what you need, sell what you don't, trade what you'd rather swap.":'اشترِ ما تحتاجه، وبِع ما لا تحتاجه، وبادل ما تفضّل مبادلته.',
+    'sign up':'إنشاء حساب','log in':'تسجيل الدخول','← back':'→ رجوع','step 1 of 1':'الخطوة ١ من ١','open your stall':'افتح كشكك',
+    'username':'اسم المستخدم','email or phone number':'البريد الإلكتروني أو رقم الهاتف','password':'كلمة المرور','confirm password':'تأكيد كلمة المرور',
+    '':'مثال: ','already have an account?':'لديك حساب بالفعل؟','create account →':'إنشاء الحساب ←',
+    'forgot password?':'نسيت كلمة المرور؟','new here?':'جديد هنا؟','create an account':'أنشئ حساباً','log in →':'تسجيل الدخول ←',
+    'welcome back':'مرحباً بعودتك','search brass, kilims, cameras, plants…':'ابحث عن نحاس، كليم، كاميرات، نباتات…',
+    'all':'الكل','home & kitchen':'المنزل والمطبخ','electronics':'إلكترونيات','plants':'نباتات','art':'فن','other':'أخرى',
+    'sort by':'ترتيب حسب','default':'الافتراضي','price: highest to lowest':'السعر: من الأعلى إلى الأقل','price: lowest to highest':'السعر: من الأقل إلى الأعلى',
+    'name: a → z':'الاسم: من أ إلى ي','name: z → a':'الاسم: من ي إلى أ',
+    '← back to browse':'→ العودة للتصفح','loading…':'جارٍ التحميل…','usually replies within an hour':'يرد عادةً خلال ساعة',
+    'add to cart':'أضف إلى السلة','♡ save':'♡ حفظ','♥ saved':'♥ تم الحفظ','🗑 delete listing':'🗑 حذف الإعلان','you might also like':'قد يعجبك أيضاً',
+    'add to wishlist':'أضف إلى المفضلة','remove from wishlist':'إزالة من المفضلة',
+    'your cart':'سلتك','your cart is empty.':'سلتك فارغة.','saved for later':'محفوظ لوقت لاحق','nothing saved yet.':'لا يوجد شيء محفوظ بعد.',
+    'my purchases':'مشترياتي','things i bought':'ما اشتريته','no purchases yet.':'لا توجد مشتريات بعد.',
+    'my listings':'إعلاناتي','things i sold':'ما بعته','nothing sold yet.':'لم يتم بيع شيء بعد.',
+    'listings':'الإعلانات','rating':'التقييم','purchases':'المشتريات','sold items':'المنتجات المباعة','log out':'تسجيل الخروج',
+    'dark mode':'الوضع الداكن','address':'العنوان','email':'البريد الإلكتروني','phone number':'رقم الهاتف','about':'حول','support':'الدعم',
+    '✕ close':'✕ إغلاق','new listing':'إعلان جديد','sell something new':'بِع شيئاً جديداً','photo':'الصورة','tap to add a photo':'اضغط لإضافة صورة',
+    'item name':'اسم المنتج','e.g. hand-loomed kilim rug':'مثال: سجادة كليم منسوجة يدوياً','description':'الوصف','a short description for buyers':'وصف مختصر للمشترين',
+    'listing type':'نوع الإعلان','sell':'بيع','trade':'مبادلة','both':'الاثنان معاً','price (egp)':'السعر (ج.م)','e.g. 450':'مثال: 450',
+    'category':'الفئة','listed as':'يُنشر باسم','post listing →':'نشر الإعلان ←','add a new listing':'إضافة إعلان جديد',
+    'sell / trade':'بيع / مبادلة','listed':'معروض','delivered':'تم التسليم','on the way':'في الطريق','swap only':'مبادلة فقط','you':'أنت',
+    'no listings match your search.':'لا توجد إعلانات مطابقة لبحثك.','no listings in this category yet.':'لا توجد إعلانات في هذه الفئة بعد.',
+    'fill in every field to continue.':'املأ جميع الحقول للمتابعة.','password must be at least 6 characters.':'يجب أن تتكون كلمة المرور من 6 أحرف على الأقل.',
+    "passwords don't match.":'كلمتا المرور غير متطابقتين.','enter your username and password.':'أدخل اسم المستخدم وكلمة المرور.',
+    'give your listing a name.':'أعطِ إعلانك اسماً.','enter a price, or switch to trade.':'أدخل السعر، أو اختر المبادلة.',
+    'invalid username or password.':'اسم المستخدم أو كلمة المرور غير صحيحة.','username already taken.':'اسم المستخدم مستخدم بالفعل.',
+    'email already registered.':'البريد الإلكتروني مسجّل بالفعل.','password changed. log in with your new password.':'تم تغيير كلمة المرور. سجّل الدخول بكلمة المرور الجديدة.',
+    'something went wrong.':'حدث خطأ ما.','you can only delete your own listings.':'يمكنك حذف إعلاناتك فقط.','customer not found.':'المستخدم غير موجود.',
+    'name is required.':'الاسم مطلوب.','product not found.':'المنتج غير موجود.','cart is empty.':'السلة فارغة.',
+    'chat':'المحادثات','select a conversation to start chatting.':'اختر محادثة لبدء الدردشة.','no conversations yet.':'لا توجد محادثات بعد.',
+    'no messages yet. say hi!':'لا توجد رسائل بعد. ابدأ بالسلام!','write a message…':'اكتب رسالة…','send':'إرسال',
+    'items for sale':'منتجات للبيع','items for trade':'منتجات للمبادلة','no items for sale.':'لا توجد منتجات للبيع.','no items for trade.':'لا توجد منتجات للمبادلة.',
+    '📷 upload photo of your item':'📷 ارفع صورة الحاجة اللي هتبدلها','note to seller (optional)':'ملاحظة للبائع (اختياري)','swap':'مبادلة','this item is swap only. send a trade offer instead.':'هذا المنتج للمبادلة فقط. أرسل عرض مبادلة بدلاً من ذلك.',
+    'buy instead':'اشتري بدلاً من ذلك','trade instead':'بادل بدلاً من ذلك','open chat':'افتح المحادثة',
+    '⏳ offer sent — waiting for the seller':'⏳ تم إرسال العرض — في انتظار البائع','❌ offer rejected — send a new one':'❌ تم رفض العرض — أرسل عرضاً جديداً',
+    'accept':'قبول','reject':'رفض','✅ accepted':'✅ تم القبول','❌ rejected':'❌ تم الرفض','⏳ waiting for the seller':'⏳ في انتظار البائع',
+    'please upload a photo of your item.':'من فضلك ارفع صورة للمنتج الذي تريد مبادلته.','you already have a pending offer for this item.':'لديك عرض قيد الانتظار لهذا المنتج بالفعل.',
+    'this item is not open for trade.':'هذا المنتج غير متاح للمبادلة.','this offer was already answered.':'تم الرد على هذا العرض بالفعل.',
+    'choose who to reply to.':'اختر من تريد الرد عليه.','no conversation with this user.':'لا توجد محادثة مع هذا المستخدم.',
+    'buy now':'اشترِ الآن','contact seller':'تواصل مع البائع','send message':'إرسال الرسالة','cancel':'إلغاء',
+    'write your message…':'اكتب رسالتك…','message sent to the seller.':'تم إرسال الرسالة إلى البائع.',
+    "message can't be empty.":'الرسالة لا يمكن أن تكون فارغة.','buy this item now?':'هل تريد شراء هذا المنتج الآن؟',
+    "you can't buy your own listing.":'لا يمكنك شراء إعلانك.',"you can't message yourself.":'لا يمكنك مراسلة نفسك.',
+    'this item was already sold.':'تم بيع هذا المنتج بالفعل.','this listing has no seller.':'هذا الإعلان بدون بائع.',
+    "delete this listing? this can't be undone.":'هل تريد حذف هذا الإعلان؟ لا يمكن التراجع عن ذلك.',
+    'rate the seller':'قيّم البائع','your rating':'تقييمك','submit':'إرسال','write a comment (optional)':'اكتب تعليقاً (اختياري)',
+    'thanks for your feedback':'شكراً على تقييمك','pick a star rating first.':'اختر عدد النجوم أولاً.',
+    'reviews':'التقييمات','no reviews yet.':'لا توجد تقييمات بعد.','seller rating:':'تقييم البائع:',
+    'generate':'توليد','generating…':'جارٍ التوليد…','add a photo first.':'ضيف صورة الأول.',
+    'please add a photo first.':'ضيف صورة الأول.','the photo is too large.':'الصورة كبيرة قوي.',
+    'ai assistant':'المساعد الذكي','ai shopping assistant':'مساعد التسوق الذكي','↻ new search':'↻ بحث جديد',
+    'not sure what to buy? ask the ai shopping assistant →':'مش عارف تشتري إيه؟ اسأل مساعد التسوق الذكي ←',
+    'hi! tell me what you need and your budget".':'أهلاً! قولّي محتاج إيه وميزانيتك كام، مثلاً: "موبايل للدراسة في حدود 8000 جنيه".',
+    'you already rated this order.':'إنت قيّمت الطلب ده قبل كده.','you can only rate your own orders.':'تقدر تقيّم طلباتك إنت بس.',
+    'rating must be between 1 and 5 stars.':'التقييم لازم يكون من 1 لـ 5 نجوم.',"you can't rate yourself.":'مينفعش تقيّم نفسك.',
+    "write what you're looking for.":'اكتب إنت بتدوّر على إيه.'
+  };
+  var currentLang = 'en';
+  var origText = new WeakMap();
+  var I18N_ATTRS = ['placeholder','title','aria-label'];
+
+  function trCore(core){
+    var k = core.toLowerCase();
+    if(Object.prototype.hasOwnProperty.call(I18N_AR, k)) return I18N_AR[k];
+    var m = core.match(/^checkout — (.+) egp$/i);
+    if(m) return 'إتمام الشراء — ' + m[1] + ' ج.م';
+    m = core.match(/^(\d+) items?$/i);
+    if(m) return m[1] + (m[1] === '1' ? ' منتج' : ' منتجات');
+    m = core.match(/^([\d.,]+) egp( \/ swap)?$/i);
+    if(m) return m[1] + ' ج.م' + (m[2] ? ' / مبادلة' : '');
+    return null;
+  }
+  window.souqT = function(str){ return currentLang === 'ar' ? (trCore(str) || str) : str; };
+
+  function translateTextNode(n){
+    if(currentLang !== 'ar') return;
+    var s = n.data, known = origText.get(n);
+    if(known && s === known.tr) return;
+    var core = s.trim(); if(!core) return;
+    var tr = trCore(core); if(tr == null) return;
+    var out = s.match(/^\s*/)[0] + tr + s.match(/\s*$/)[0];
+    origText.set(n, {orig:s, tr:out});
+    n.data = out;
+  }
+
+  function textNodesUnder(root){
+    var list = [], w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+      acceptNode: function(n){
+        var t = n.parentNode && n.parentNode.nodeName;
+        return (t === 'SCRIPT' || t === 'STYLE') ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT;
+      }
+    });
+    while(w.nextNode()) list.push(w.currentNode);
+    return list;
+  }
+
+  function translateAttrs(el){
+    if(!el.hasAttribute) return;
+    I18N_ATTRS.forEach(function(a){
+      if(!el.hasAttribute(a)) return;
+      var dk = 'data-i18n-' + a;
+      var orig = el.hasAttribute(dk) ? el.getAttribute(dk) : el.getAttribute(a);
+      var tr = trCore(orig.trim());
+      if(tr == null) return;
+      if(!el.hasAttribute(dk)) el.setAttribute(dk, orig);
+      el.setAttribute(a, tr);
+    });
+  }
+
+  function translateTree(root){
+    if(root.nodeType === 3){ translateTextNode(root); return; }
+    if(root.nodeType !== 1) return;
+    translateAttrs(root);
+    root.querySelectorAll('*').forEach(translateAttrs);
+    textNodesUnder(root).forEach(translateTextNode);
+  }
+
+  function restoreTree(root){
+    textNodesUnder(root).forEach(function(n){
+      var k = origText.get(n);
+      if(k && n.data === k.tr) n.data = k.orig;
+      origText.delete(n);
+    });
+    root.querySelectorAll('*').forEach(function(el){
+      I18N_ATTRS.forEach(function(a){
+        var dk = 'data-i18n-' + a;
+        if(el.hasAttribute(dk)){ el.setAttribute(a, el.getAttribute(dk)); el.removeAttribute(dk); }
+      });
+    });
+  }
+
+  new MutationObserver(function(muts){
+    if(currentLang !== 'ar') return;
+    muts.forEach(function(m){
+      if(m.type === 'characterData') translateTextNode(m.target);
+      else m.addedNodes.forEach(function(n){ translateTree(n); });
+    });
+  }).observe(document.body, {childList:true, subtree:true, characterData:true});
+
+  function setLang(lang){
+    currentLang = lang === 'ar' ? 'ar' : 'en';
+    document.documentElement.setAttribute('lang', currentLang);
+    document.documentElement.setAttribute('dir', currentLang === 'ar' ? 'rtl' : 'ltr');
+    if(currentLang === 'ar') translateTree(document.body); else restoreTree(document.body);
+    try{ localStorage.setItem('souq-lang', currentLang); }catch(e){}
+  }
+
+  var langBtn = document.getElementById('langBtn');
+  if(langBtn) langBtn.addEventListener('click', function(){ setLang(currentLang === 'ar' ? 'en' : 'ar'); });
+  var startLang = 'en';
+  try{ if(localStorage.getItem('souq-lang') === 'ar') startLang = 'ar'; }catch(e){}
+  if(startLang === 'ar') setLang('ar');
+
+  var homeScreen = document.getElementById('home'), spBar = document.getElementById('scrollBar');
+  homeScreen.addEventListener('scroll', function(){
+    var max = homeScreen.scrollHeight - homeScreen.clientHeight;
+    spBar.style.width = max > 0 ? (homeScreen.scrollTop / max * 100) + '%' : '0';
+  }, {passive:true});
+
+  loadProducts();
+  if(currentUser){
+    var nameEl = document.getElementById('profileName');
+    var settingsUser = document.getElementById('settingsUser');
+    if(nameEl) nameEl.textContent = currentUser.username;
+    if(settingsUser) settingsUser.textContent = currentUser.username;
+    applyUserInfo(currentUser);
+    refreshWishlist();
+    refreshCart();
+    refreshNotifications();
+  } else {
+    renderLocalCart();
+  }
+  goTo(isAuthed ? 'home' : 'hero');
+})();
+</script>
+</body>
+</html>
