@@ -1144,7 +1144,10 @@ def call_llm(system: str, messages: list) -> dict:
              "messages": [{"role": "system", "content": system}] + messages},
             {"Authorization": "Bearer " + AI_API_KEY} if AI_API_KEY else {},
         )
+        print("Model used:", data.get("model"))                                                                                                         
         text = data["choices"][0]["message"]["content"]
+        print(text)
+
     match = re.search(r"\{.*\}", text, re.S)
     if not match:
         raise ValueError("model did not return JSON: " + text[:120])
